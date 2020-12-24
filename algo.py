@@ -1,66 +1,84 @@
-import pandas
-import threading
+import multiprocessing
+import logging
 import time
 
-from logbook import Logger
-from pylivetrader.api import order_target, record, symbol
+import alpaca_trade_api as tradeapi
+api = tradeapi.REST()
 
-BUY_AMOUNT = 100
+FORMAT = '%(asctime)-15s | %(message)s'
+logging.basicConfig(format=FORMAT, filename='history.log', level=logging.INFO)
 
-log = Logger('algo-logger')
+# account = api.get_account()
+# account.status
+
+tickers = ['AAPL', 'MSFT', 'TSLA']
 
 # called once when algo.py runs for the first time
 def initialize(context):
 
-    # list all tickers we want to trade, with their threads
-    tickers = ['AAPL', 'MSFT', 'TSLA']
-
+    start_loop(60)
     # asset that we'll be trading.
     # context.asset = symbol('AAPL')
 
-# called every time interval specified
-def handle_data(context, data):
 
-    # create a thread for each ticker (yes it must be created every time)
+def start_loop(seconds):
     
-    # loop this
-    # threading.Thread(target=)
+    # run our sub processes
+    jobs = []
+    run_workers(jobs)
 
-    # macd = macd(context, data)
+    # wait our desired amount of seconds (as per Alpaca)
+    sleep(seconds)
 
-    # Trading logic
+    # check if all our jobs finished successfully
+    for job in jobs:
+        if job.is_alive():
+            logging.warning("Process {} is still alive! Killing it now".format(job.pid))
+            job.terminate()
+
+    # if still processes exist
+        # log
+    if status == 'failed':
+        pass
+        # log
+
+def run_workers(jobs):
+
+    # populate processes list with an instance per ticker
+    for ticker in tickers:
+        process = multiprocessing.Process(target=work, args=(ticker,))
+        process.start()
+        job.append(process)
+
+def work(ticker):
+
+    macd = macd(ticker)
+
+    # combined trading logic
     if macd > 0:
-        # order_target_percent allocates a specified percentage of your
-        # portfolio to a long position in a given asset. (A value of 1
-        # means that 100% of your portfolio will be allocated.)
-        order_id = order_target(context.asset, BUY_AMOUNT)
+        submit_order
+        # order_id = order_target(context.asset, BUY_AMOUNT)
         if order_id:
-            log.info("Bought {} shares of {}".format(BUY_AMOUNT,
-                                                     context.asset.symbol))
+            logging.info("Bought {} shares of {}".format(BUY_AMOUNT, context.asset.symbol))
+
     elif macd < 0:
-        # You can supply a negative value to short an asset instead.
-        order_id = order_target(context.asset, 0)
+        submit_order
+        # order_id = order_target(context.asset, 0)
         if order_id:
-            log.info("Closed position for {}".format(context.asset.symbol))
+            logging.info("Closed position for {}".format(context.asset.symbol))
 
-    # Save values for later inspection
-    record(AA=data.current(context.asset, 'price'),
-           short_mavg=short_ema,
-           long_mavg=long_ema)
+    # don't forget to log
 
-def macd(context, data):
+def macd(ticker):
 
     # calculate short-term EMA
-    order_target(context.asset, BUY_AMOUNT)
-    short_periods = 12 # past 12 minutes
-    short_data = data.history(
-        context.asset, 'price', bar_count=short_periods, frequency="1m")
+    short_period = 12 # past 12 minutes
+    short_data = api.polygon.historic_agg_v2(ticker, short_period, 'minute', _from=start, to=end).df
     short_ema = pandas.Series.ewm(short_data, span=short_periods).mean().iloc[-1]
 
     # calculate long-term EMA
-    long_periods = 26 # past 26 mintues
-    long_data = data.history(
-        context.asset, 'price', bar_count=long_periods, frequency="1m")
+    long_period = 26 # past 26 mintues
+    long_data = api.polygon.historic_agg_v2(ticker, long_period, 'minute', _from=start, to=end).df
     long_ema = pandas.Series.ewm(long_data, span=long_periods).mean().iloc[-1]
 
     return short_ema - long_ema
