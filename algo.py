@@ -1,28 +1,69 @@
 import multiprocessing
 import logging
 import time
+import math
 
 import alpaca_trade_api as tradeapi
 api = tradeapi.REST()
+account = api.get_account()
+
+# import order_wrapper as order
 
 FORMAT = '%(asctime)-15s | %(message)s'
 logging.basicConfig(format=FORMAT, filename='history.log', level=logging.INFO)
 
-# account = api.get_account()
-# account.status
+tickers = {
+    # symbol : desired percentage of portfolio
+    'AAPL': 50,
+    'TSLA': 20,
+    'MSFT': 30}
 
-tickers = ['AAPL', 'MSFT', 'TSLA']
+def main():
+    # ensuring our account setup is okay
+    account_status = "account status: {}".format(account.status)
+    print(account_status)
+    logging.info(account_status)
 
-# called once when algo.py runs for the first time
-def initialize(context):
+    # check if tickers are tradable on Alpaca
 
-    start_loop(60)
-    # asset that we'll be trading.
-    # context.asset = symbol('AAPL')
+    # 
+    # rebalance()
 
+    # starting our main process
+    #start_loop(60)
+
+def rebalance():
+
+    positions = account.list_positions()
+    cash = account.cash
+
+    for position in positions:
+        # check if ticker is a currently held position
+            if position.symbol in tickers.keys():
+                # calculate percentage of portfolio
+                pop = math.floor(position.cost_basis / cash)
+                # update this percentage to our ticker value, and warn user
+                # if this conflicts with current desired pop
+                if tickers.get(position.symbol) != pop:
+                    logging.warning("desired pop is {} while current is (and using) {}"
+                                    .format(tickers.get(position.symbol), pop))
+                tickers[position.symbol] = pop
+                #subtract from our total cash, to calculate new tickers later
+                cash -= position.cost_basis
+
+    # now that we've allocated portfolio percentages for our existing positions,
+    # we can calculate new percentages for our new desired tickers
+    for ticker in tickers.keys():
+        if ticker not in position:
+            pass
+
+    # percentage of portfolio
+    pop = math.floor(100 * 1 / len(tickers))
 
 def start_loop(seconds):
     
+    logging.info("starting main loop")
+
     # run our sub processes
     jobs = []
     run_workers(jobs)
@@ -30,14 +71,13 @@ def start_loop(seconds):
     # wait our desired amount of seconds (as per Alpaca)
     sleep(seconds)
 
-    # check if all our jobs finished successfully
+    # check if all our jobs finished, and done successfully
     for job in jobs:
         if job.is_alive():
-            logging.warning("Process {} is still alive! Killing it now".format(job.pid))
+            api.cancel_all_orders()
+            logging.warning("process {} is still alive! Canceling orders and killing it now".format(job.pid))
             job.terminate()
 
-    # if still processes exist
-        # log
     if status == 'failed':
         pass
         # log
@@ -54,18 +94,22 @@ def work(ticker):
 
     macd = macd(ticker)
 
-    # combined trading logic
+    # buy
     if macd > 0:
-        submit_order
-        # order_id = order_target(context.asset, BUY_AMOUNT)
+        order_id = api.submit_order(ticker, BUY_AMOUNT)
         if order_id:
-            logging.info("Bought {} shares of {}".format(BUY_AMOUNT, context.asset.symbol))
-
+            logging.info("bought {} shares of {}".format(BUY_AMOUNT, context.asset.symbol))
+        # else
+        #     pass
+            #error
+    #sell
     elif macd < 0:
-        submit_order
-        # order_id = order_target(context.asset, 0)
+        order_id = api.submit_order(ticker, BUY_AMOUNT)
         if order_id:
-            logging.info("Closed position for {}".format(context.asset.symbol))
+            logging.info("closed position for {}".format(context.asset.symbol))
+        # else
+        #     pass
+            #error
 
     # don't forget to log
 
@@ -82,3 +126,6 @@ def macd(ticker):
     long_ema = pandas.Series.ewm(long_data, span=long_periods).mean().iloc[-1]
 
     return short_ema - long_ema
+
+if __name__ == "__main__":
+    main()
