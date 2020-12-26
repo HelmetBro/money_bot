@@ -11,11 +11,9 @@ account = api.get_account()
 FORMAT = '%(asctime)-15s | %(message)s'
 logging.basicConfig(format=FORMAT, filename='history.log', level=logging.INFO)
 
-tickers = {
-    # symbol : desired percentage of portfolio
-    'AAPL': 33,
-    'TSLA': 34,
-    'SBUX': 33}
+### TEMP v
+tickers = {'AAPL': 10000,'MSFT': 10000,'TSLA':10000,'SBUX':10000}
+### TEMP ^
 
 def main():
     # ensuring our account setup is okay
@@ -24,12 +22,10 @@ def main():
     logging.info(account_status)
 
     # check if tickers are tradable on Alpaca
-
-    # 
     # rebalance()
 
     # starting our main process
-    #start_loop(60)
+    start_loop(60)
 
 # def rebalance():
 
@@ -88,7 +84,7 @@ def start_loop(seconds):
 def run_workers(jobs):
 
     # populate processes list with an instance per ticker
-    for ticker in tickers:
+    for ticker in tickers.keys():
         process = multiprocessing.Process(target=work, args=(ticker,))
         process.start()
         job.append(process)
@@ -99,17 +95,20 @@ def work(ticker):
     macd = macd(ticker)['close']
     rsi = rsi(ticker)['close']
 
+    calculate_quantity(ticker)
+
     # buy
     if macd > 0 and rsi < 40:
         order_id = api.submit_order(
             symbol=ticker,
             size='buy',
             type='market',
-            qty='100',
+            qty=calculate_buy_quantity(ticker),
             time_in_force='fok',
             extended_hours=true) # temporary
         if order_id:
             logging.info("bought {} shares of {}".format(BUY_AMOUNT, context.asset.symbol))
+            tickers[ticker] = api.get_position(ticker).cost_basis # temporary
         # else
         #     cancel_order(order_id)
         #     logging.warning("unable to buy {} shares of {}".format(BUY_AMOUNT, context.asset.symbol))
@@ -120,16 +119,23 @@ def work(ticker):
             symbol=ticker,
             size='sell',
             type='market',
-            qty='100',
+            qty=calculate_sell_quantity(ticker),
             time_in_force='fok',
             extended_hours=true) # temporary
         if order_id:
             logging.info("closed position for {}".format(context.asset.symbol))
+            tickers[ticker] = 0 # temporary
         # else
         #     cancel_order(order_id)
         #     logging.info("unable to close position for {}".format(context.asset.symbol))
 
     # don't forget to log
+
+def calculate_buy_quantity(ticker):
+    return math.floor(tickers[ticker] / api.get_position(ticker).market_value)
+
+def calculate_sell_quantity(ticker):
+    return api.get_position(ticker).qty
 
 def macd(ticker):
 
