@@ -1,15 +1,19 @@
+import os
 import multiprocessing
 import logging
 import time
 import math
 import datetime
+import pandas
 
 import alpaca_trade_api as tradeapi
 api = tradeapi.REST()
 account = api.get_account()
 
 FORMAT = '%(asctime)-15s | %(message)s'
-logging.basicConfig(format=FORMAT, filename='history.log', level=logging.INFO)
+filename = 'history.log'
+if os.path.exists(filename): os.remove(filename)
+logging.basicConfig(format=FORMAT, filename=filename, level=logging.INFO)
 
 ### TEMP v
 tickers = {'AAPL': 10000,'MSFT': 10000,'TSLA':10000,'SBUX':10000}
@@ -60,7 +64,6 @@ def main():
 #     # pop = math.floor(100 * 1 / len(tickers))
 
 def start_loop(seconds):
-    
     logging.info("starting main loop")
 
     # run our sub processes
@@ -68,7 +71,7 @@ def start_loop(seconds):
     run_workers(jobs)
 
     # wait our desired amount of seconds (as per Alpaca)
-    sleep(seconds)
+    time.sleep(seconds)
 
     # check if all our jobs finished, and done successfully
     for job in jobs:
@@ -82,23 +85,19 @@ def start_loop(seconds):
         # log
 
 def run_workers(jobs):
-
     # populate processes list with an instance per ticker
     for ticker in tickers.keys():
         process = multiprocessing.Process(target=work, args=(ticker,))
         process.start()
-        job.append(process)
+        jobs.append(process)
 
 def work(ticker):
-
-    # calling algorithms using the closing price
-    macd = macd(ticker)['close']
-    rsi = rsi(ticker)['close']
-
-    calculate_quantity(ticker)
+    # calling algorithms and using the lastclosing price
+    macd_result = macd(ticker)['close']
+    rsi_result = rsi(ticker)['close']
 
     # buy
-    if macd > 0 and rsi < 40:
+    if macd_result > 0 and rsi_result < 40:
         order_id = api.submit_order(
             symbol=ticker,
             size='buy',
@@ -114,7 +113,7 @@ def work(ticker):
         #     logging.warning("unable to buy {} shares of {}".format(BUY_AMOUNT, context.asset.symbol))
     
     #sell
-    elif macd < 0 and rsi > 60:
+    elif macd_result < 0 and rsi_result > 60:
         order_id = api.submit_order(
             symbol=ticker,
             size='sell',
@@ -179,7 +178,7 @@ def rsi(ticker):
     # and finally, get our rsi
     rs = rolling_up / rolling_down
     rsi = 100.0 - (100.0 / (1.0 + rs))
-    return rsi
+    return rsi.iloc[-1]
 
 if __name__ == "__main__":
     main()
