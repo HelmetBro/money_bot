@@ -65,20 +65,21 @@ def main():
 
 def start_loop(seconds):
     logging.info("starting main loop")
-
-    # run our sub processes
     jobs = []
-    run_workers(jobs)
 
-    # wait our desired amount of seconds (as per Alpaca)
-    time.sleep(seconds)
+    while True:
+        # run our sub processes
+        run_workers(jobs)
 
-    # check if all our jobs finished, and done successfully
-    for job in jobs:
-        if job.is_alive():
-            api.cancel_all_orders()
-            logging.warning("process {} is still alive! Canceling all orders and killing it now".format(job.pid))
-            job.terminate()
+        # wait our desired amount of seconds (as per Alpaca)
+        time.sleep(seconds)
+
+        # check if all our jobs finished, and done successfully
+        for job in jobs:
+            if job.is_alive():
+                api.cancel_all_orders()
+                logging.warning("process {} is still alive! Canceling all orders and killing it now".format(job.pid))
+                job.terminate()
 
 def run_workers(jobs):
     # populate processes list with an instance per ticker
