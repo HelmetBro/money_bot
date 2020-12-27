@@ -80,10 +80,6 @@ def start_loop(seconds):
             logging.warning("process {} is still alive! Canceling all orders and killing it now".format(job.pid))
             job.terminate()
 
-    if status == 'failed':
-        pass
-        # log
-
 def run_workers(jobs):
     # populate processes list with an instance per ticker
     for ticker in tickers.keys():
