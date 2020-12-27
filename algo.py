@@ -78,8 +78,9 @@ def start_loop(seconds):
         for job in jobs:
             if job.is_alive():
                 api.cancel_all_orders()
-                logging.warning("process {} is still alive! Canceling all orders and killing it now".format(job.pid))
+                logging.warning("process {} is still alive! canceling all orders and killing it now".format(job.pid))
                 job.terminate()
+        jobs.clear()
 
 def run_workers(jobs):
     # populate processes list with an instance per ticker
