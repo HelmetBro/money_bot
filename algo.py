@@ -28,7 +28,7 @@ ALPACA_SLEEP_CYCLE = 60 # in seconds. one munite before an api call
 tickers = {'AAPL', 'MSFT', 'TSLA'}
 ### TEMP ^
 
-#
+# list of sub-processes for each ticker
 child_processes = []
 
 def main():
@@ -95,7 +95,11 @@ def start_loop():
         if log['priority'] == 'critical': logging.critical(log['data'])
         logging_queue.task_done()
 
-def work(logger, ticker):
+def work(logging_queue, ticker):
+    # configure out logger to be global to this processes namespace
+    global logger
+    logger = logging_queue
+
     cash = 10000
     while True:
         try:
@@ -104,14 +108,13 @@ def work(logger, ticker):
             rsi_result = rsi(ticker)['close']
             cash = buy_or_sell_macd_rsi(macd_result, rsi_result, ticker, cash)
         except FunctionTimedOut:
-            logger.put(['priority': 'error', 'data': ])
-            logging.ERROR("PID: {} TICKER: {} timed out! TIMEOUT = {}".format(os.getpid(), ticker, TIMEOUT))
+            log("PID: {} TICKER: {} timed out! TIMEOUT = {}".format(os.getpid(), ticker, TIMEOUT), 'error')
             break
         
         # wait our desired amount of seconds (as per Alpaca)
         time.sleep(ALPACA_SLEEP_CYCLE)
 
-    logging.INFO("PID: {} TICKER: {} is exiting".format(os.getpid(), ticker))
+    log("PID: {} TICKER: {} is exiting".format(os.getpid(), ticker))
 
 @func_set_timeout(TIMEOUT)
 def buy_or_sell_macd_rsi(macd_result, rsi_result, ticker, cash):
@@ -125,14 +128,14 @@ def buy_or_sell_macd_rsi(macd_result, rsi_result, ticker, cash):
             time_in_force='fok',
             extended_hours=true)
         if order.status == 'accepted':
-            logging.info("bought {} shares of {} at avg price of ${} for ${}!".format(
+            log("bought {} shares of {} at avg price of ${} for ${}!".format(
                 order.qty, 
                 ticker, 
                 order.filled_avg_price,
                 order.qty * order.filled_avg_price))
             cash = 0
         else:
-            logging.info("{} buy order was unable to be fulfilled! cash: {}".format(ticker, cash))
+            log("{} buy order was unable to be fulfilled! cash: {}".format(ticker, cash))
 
     #sell
     elif macd_result < 0 and rsi_result > 60:
@@ -144,12 +147,12 @@ def buy_or_sell_macd_rsi(macd_result, rsi_result, ticker, cash):
             time_in_force='fok',
             extended_hours=true)
         if order.status == 'accepted':
-            logging.info("closed position for {}!".format(ticker))
+            log("closed position for {}!".format(ticker))
             cash = order.qty * order.filled_avg_price
         else:
-            logging.info("{} sell order was unable to be closed! cash: {}".format(ticker, cash))
+            log("{} sell order was unable to be closed! cash: {}".format(ticker, cash))
     else:
-        logging.debug("{} -> macd: {}, rsi: {}. no trade signal thrown".format(ticker, macd_result, rsi_result))
+        log("{} -> macd: {}, rsi: {}. no trade signal thrown".format(ticker, macd_result, rsi_result), 'error')
     
     return cash
 
@@ -202,6 +205,10 @@ def cleanup(*args):
         print("terminating process {}".format(process.pid))
         process.terminate()
     os._exit(0)
+
+logger = None
+def log(data, priority='info'):
+    logger.put({'priority': priority, 'data': data})
 
 for sig in (SIGABRT, SIGINT, SIGTERM):
     signal(sig, cleanup)
