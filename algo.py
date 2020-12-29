@@ -6,18 +6,30 @@ import math
 import datetime
 import pandas
 
+# timeouts, errors, signals, etc
+from func_timeout import func_set_timeout, FunctionTimedOut
+from signal import *
+
+# Alpaca stuff
 import alpaca_trade_api as tradeapi
 api = tradeapi.REST()
 account = api.get_account()
 
+# logging
 FORMAT = '%(asctime)-15s | %(message)s'
 filename = 'history.log'
 if os.path.exists(filename): os.remove(filename)
-logging.basicConfig(format=FORMAT, filename=filename, level=logging.INFO)
+logging.basicConfig(format=FORMAT, filename=filename, level=logging.DEBUG)
+
+TIMEOUT = 5 # seconds for function call timeout
+ALPACA_SLEEP_CYCLE = 60 # in seconds. one munite before an api call
 
 ### TEMP v
-tickers = {'AAPL': 10000,'MSFT': 10000,'TSLA':10000,'SBUX':10000}
+tickers = {'AAPL', 'MSFT', 'TSLA'}
 ### TEMP ^
+
+#
+child_processes = []
 
 def main():
     # ensuring our account setup is okay
@@ -29,7 +41,7 @@ def main():
     # rebalance()
 
     # starting our main process
-    start_loop(60)
+    start_loop()
 
 # def rebalance():
 
@@ -63,79 +75,86 @@ def main():
 #     # percentage of portfolio
 #     # pop = math.floor(100 * 1 / len(tickers))
 
-def start_loop(seconds):
+def start_loop():
     logging.info("starting main loop")
-    jobs = []
 
-    while True:
-        # run our sub processes
-        run_workers(jobs)
-
-        # wait our desired amount of seconds (as per Alpaca)
-        time.sleep(seconds)
-
-        # check if all our jobs finished, and done successfully
-        for job in jobs:
-            if job.is_alive():
-                api.cancel_all_orders()
-                logging.warning("process {} is still alive! canceling all orders and killing it now".format(job.pid))
-                job.terminate()
-        jobs.clear()
-
-def run_workers(jobs):
     # populate processes list with an instance per ticker
-    for ticker in tickers.keys():
-        process = multiprocessing.Process(target=work, args=(ticker,))
+    logging_queue = multiprocessing.Queue()
+    for ticker in tickers:
+        process = multiprocessing.Process(target=work, args=(logging_queue,ticker,))
         process.start()
-        jobs.append(process)
+        child_processes.append(process)
 
-def work(ticker):
-    # calling algorithms and using the lastclosing price
-    macd_result = macd(ticker)['close']
-    rsi_result = rsi(ticker)['close']
+    # listen to any logging requests, and populate our log file using a mutex
+    while True:
+        log = logging_queue.get()
+        if log['priority'] == 'debug': logging.debug(log['data'])
+        if log['priority'] == 'info': logging.info(log['data'])
+        if log['priority'] == 'warning': logging.warning(log['data'])
+        if log['priority'] == 'error': logging.error(log['data'])
+        if log['priority'] == 'critical': logging.critical(log['data'])
+        logging_queue.task_done()
 
+def work(logger, ticker):
+    cash = 10000
+    while True:
+        try:
+            # calling algorithms and using the last closing price
+            macd_result = macd(ticker)['close']
+            rsi_result = rsi(ticker)['close']
+            cash = buy_or_sell_macd_rsi(macd_result, rsi_result, ticker, cash)
+        except FunctionTimedOut:
+            logger.put(['priority': 'error', 'data': ])
+            logging.ERROR("PID: {} TICKER: {} timed out! TIMEOUT = {}".format(os.getpid(), ticker, TIMEOUT))
+            break
+        
+        # wait our desired amount of seconds (as per Alpaca)
+        time.sleep(ALPACA_SLEEP_CYCLE)
+
+    logging.INFO("PID: {} TICKER: {} is exiting".format(os.getpid(), ticker))
+
+@func_set_timeout(TIMEOUT)
+def buy_or_sell_macd_rsi(macd_result, rsi_result, ticker, cash):
     # buy
     if macd_result > 0 and rsi_result < 40:
-        order_id = api.submit_order(
+        order = api.submit_order(
             symbol=ticker,
             size='buy',
             type='market',
-            qty=calculate_buy_quantity(ticker),
+            qty=math.floor(cash / api.get_position(ticker).market_value),
             time_in_force='fok',
-            extended_hours=true) # temporary
-        if order_id:
-            logging.info("bought {} shares of {}".format(BUY_AMOUNT, context.asset.symbol))
-            tickers[ticker] = api.get_position(ticker).cost_basis # temporary
-        # else
-        #     cancel_order(order_id)
-        #     logging.warning("unable to buy {} shares of {}".format(BUY_AMOUNT, context.asset.symbol))
-    
+            extended_hours=true)
+        if order.status == 'accepted':
+            logging.info("bought {} shares of {} at avg price of ${} for ${}!".format(
+                order.qty, 
+                ticker, 
+                order.filled_avg_price,
+                order.qty * order.filled_avg_price))
+            cash = 0
+        else:
+            logging.info("{} buy order was unable to be fulfilled! cash: {}".format(ticker, cash))
+
     #sell
     elif macd_result < 0 and rsi_result > 60:
         order_id = api.submit_order(
             symbol=ticker,
             size='sell',
             type='market',
-            qty=calculate_sell_quantity(ticker),
+            qty=api.get_position(ticker).qty,
             time_in_force='fok',
-            extended_hours=true) # temporary
-        if order_id:
-            logging.info("closed position for {}".format(context.asset.symbol))
-            tickers[ticker] = 0 # temporary
-        # else
-        #     cancel_order(order_id)
-        #     logging.info("unable to close position for {}".format(context.asset.symbol))
+            extended_hours=true)
+        if order.status == 'accepted':
+            logging.info("closed position for {}!".format(ticker))
+            cash = order.qty * order.filled_avg_price
+        else:
+            logging.info("{} sell order was unable to be closed! cash: {}".format(ticker, cash))
+    else:
+        logging.debug("{} -> macd: {}, rsi: {}. no trade signal thrown".format(ticker, macd_result, rsi_result))
+    
+    return cash
 
-    # don't forget to log
-
-def calculate_buy_quantity(ticker):
-    return math.floor(tickers[ticker] / api.get_position(ticker).market_value)
-
-def calculate_sell_quantity(ticker):
-    return api.get_position(ticker).qty
-
+@func_set_timeout(TIMEOUT)
 def macd(ticker):
-
     # setting time period to grab data (start doesn't matter)
     start = '1970-01-01'
     end = datetime.datetime.now()
@@ -152,8 +171,8 @@ def macd(ticker):
 
     return short_ema - long_ema
 
+@func_set_timeout(TIMEOUT)
 def rsi(ticker):
-
     # setting time period to grab data (start doesn't matter)
     start = '1970-01-01'
     end = datetime.datetime.now()
@@ -178,5 +197,17 @@ def rsi(ticker):
     rsi = 100.0 - (100.0 / (1.0 + rs))
     return rsi.iloc[-1]
 
+def cleanup(*args):
+    for process in child_processes:
+        print("terminating process {}".format(process.pid))
+        process.terminate()
+    os._exit(0)
+
+for sig in (SIGABRT, SIGINT, SIGTERM):
+    signal(sig, cleanup)
+
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    finally:
+        cleanup()
