@@ -21,11 +21,11 @@ filename = 'history.log'
 if os.path.exists(filename): os.remove(filename)
 logging.basicConfig(format=FORMAT, filename=filename, level=logging.DEBUG)
 
-TIMEOUT = 5 # seconds for function call timeout
+TIMEOUT = 9 # seconds for function timeout (Alpaca makes 3 retrys at 3 seconds timeout for each)
 ALPACA_SLEEP_CYCLE = 60 # in seconds. one munite before an api call
 
 ### TEMP v
-tickers = {'AAPL', 'MSFT', 'TSLA'}
+tickers = {'AAPL', 'MSFT', 'TSLA', 'SBUX'}
 ### TEMP ^
 
 # list of sub-processes for each ticker
@@ -93,9 +93,9 @@ def start_loop():
         if log['priority'] == 'warning': logging.warning(log['data'])
         if log['priority'] == 'error': logging.error(log['data'])
         if log['priority'] == 'critical': logging.critical(log['data'])
-        logging_queue.task_done()
 
 def work(logging_queue, ticker):
+    print("subprocess print test")
     # configure out logger to be global to this processes namespace
     global logger
     logger = logging_queue
@@ -136,7 +136,6 @@ def buy_or_sell_macd_rsi(macd_result, rsi_result, ticker, cash):
             cash = 0
         else:
             log("{} buy order was unable to be fulfilled! cash: {}".format(ticker, cash))
-
     #sell
     elif macd_result < 0 and rsi_result > 60:
         order_id = api.submit_order(
@@ -152,15 +151,15 @@ def buy_or_sell_macd_rsi(macd_result, rsi_result, ticker, cash):
         else:
             log("{} sell order was unable to be closed! cash: {}".format(ticker, cash))
     else:
-        log("{} -> macd: {}, rsi: {}. no trade signal thrown".format(ticker, macd_result, rsi_result), 'error')
+        log("{} -> macd: {}, rsi: {}. no trade signal thrown".format(ticker, macd_result, rsi_result), 'debug')
     
     return cash
 
 @func_set_timeout(TIMEOUT)
 def macd(ticker):
     # setting time period to grab data (start doesn't matter)
-    start = '1970-01-01'
     end = datetime.datetime.now()
+    start = end - datetime.timedelta(days=1)
 
     # calculate short-term EMA
     short_period = 12 # past 12 minutes
@@ -177,9 +176,9 @@ def macd(ticker):
 @func_set_timeout(TIMEOUT)
 def rsi(ticker):
     # setting time period to grab data (start doesn't matter)
-    start = '1970-01-01'
     end = datetime.datetime.now()
-    
+    start = end - datetime.timedelta(days=1)
+
     rsi_period = 14 # past 14 minutes
 
     # grab our ticker prices and grab only the deltas
@@ -200,15 +199,15 @@ def rsi(ticker):
     rsi = 100.0 - (100.0 / (1.0 + rs))
     return rsi.iloc[-1]
 
-def cleanup(*args):
-    for process in child_processes:
-        print("terminating process {}".format(process.pid))
-        process.terminate()
-    os._exit(0)
-
 logger = None
 def log(data, priority='info'):
     logger.put({'priority': priority, 'data': data})
+
+def cleanup(*args):
+    for process in child_processes:
+        print("killing process {}".format(process.pid))
+        process.kill()
+    os._exit(0)
 
 for sig in (SIGABRT, SIGINT, SIGTERM):
     signal(sig, cleanup)
@@ -216,5 +215,5 @@ for sig in (SIGABRT, SIGINT, SIGTERM):
 if __name__ == "__main__":
     try:
         main()
-    finally:
+    except Exception:
         cleanup()
