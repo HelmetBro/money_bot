@@ -68,16 +68,25 @@ def work(logging_queue, ticker):
     sec = security.Security(ticker)
     while True:
         try:
+            # wait our desired amount of seconds (as per Alpaca)
+            time.sleep(ALPACA_SLEEP_CYCLE)
+            
+            # only run if the market is open
+            if api.get_clock().is_open == False:
+                logger.log("market is closed".format(), 'debug')
+                continue
+
             # calling algorithms and using the last closing price
             macd_result = algo.macd(ticker)['close']
             rsi_result = algo.rsi(ticker)['close']
             cash = algo.buy_or_sell_macd_rsi(macd_result, rsi_result, sec)
+
         except FunctionTimedOut:
             logger.log("PID: {} TICKER: {} timed out! TIMEOUT = {}".format(os.getpid(), ticker, TIMEOUT), 'error')
             break
 
-        # wait our desired amount of seconds (as per Alpaca)
-        time.sleep(ALPACA_SLEEP_CYCLE)
+        # # wait our desired amount of seconds (as per Alpaca)
+        # time.sleep(ALPACA_SLEEP_CYCLE)
 
     logger.log("PID: {} TICKER: {} is exiting".format(os.getpid(), ticker))
 
