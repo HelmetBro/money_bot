@@ -64,8 +64,13 @@ def start_loop():
 def work(logging_queue, ticker):
     logger.process_setup(logging_queue)
     logger.log("subprocess for {} started".format(ticker))
+    
     # create a security object for each process given the ticker
     sec = security.Security(ticker)
+    # re-create an api session for each process
+    global api
+    api = tradeapi.REST()
+    
     while True:
         try:
             # wait our desired amount of seconds (as per Alpaca)
