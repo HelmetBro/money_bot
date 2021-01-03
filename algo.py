@@ -6,6 +6,8 @@ api = tradeapi.REST()
 import logger
 from func_timeout import func_set_timeout, FunctionTimedOut
 
+import process_api
+
 TIMEOUT = 9
 
 @func_set_timeout(TIMEOUT)
@@ -15,7 +17,7 @@ def buy(security):
         return
 
     # market orders are only avaliable during market hours
-    order = api.submit_order(
+    order = process_api.api.submit_order(
         symbol=security.ticker,
         side='buy',
         type='market',
@@ -37,7 +39,7 @@ def sell(security):
         logger.log("no shares for ticker {} exist!".format(security.ticker), 'debug')
         return
 
-    order_id = api.submit_order(
+    order_id = process_api.api.submit_order(
             symbol=security.ticker,
             side='sell',
             type='market',
@@ -65,12 +67,12 @@ def macd(ticker):
 
     # calculate short-term EMA
     short_period = 12 # past 12 minutes
-    short_data = api.polygon.historic_agg_v2(ticker, short_period, 'minute', _from=start, to=end).df
+    short_data = process_api.api.polygon.historic_agg_v2(ticker, short_period, 'minute', _from=start, to=end).df
     short_ema = pandas.Series.ewm(short_data, span=short_period).mean().iloc[-1]
 
     # calculate long-term EMA
     long_period = 26 # past 26 mintues
-    long_data = api.polygon.historic_agg_v2(ticker, long_period, 'minute', _from=start, to=end).df
+    long_data = process_api.api.polygon.historic_agg_v2(ticker, long_period, 'minute', _from=start, to=end).df
     long_ema = pandas.Series.ewm(long_data, span=long_period).mean().iloc[-1]
 
     return short_ema - long_ema
@@ -83,7 +85,7 @@ def rsi(ticker):
     rsi_period = 14 # past 14 minutes
 
     # grab our ticker prices and grab only the deltas
-    stock_data = api.polygon.historic_agg_v2(ticker, rsi_period, 'minute', _from=start, to=end).df
+    stock_data = process_api.api.polygon.historic_agg_v2(ticker, rsi_period, 'minute', _from=start, to=end).df
     delta = stock_data.diff()
     up, down = delta.copy(), delta.copy()
     

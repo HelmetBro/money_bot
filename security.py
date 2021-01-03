@@ -1,7 +1,6 @@
 import logger
 
-import alpaca_trade_api as tradeapi
-api = tradeapi.REST()
+import process_api
 
 from func_timeout import func_set_timeout, FunctionTimedOut
 TIMEOUT = 9
@@ -19,7 +18,7 @@ class Security:
 
     @func_set_timeout(TIMEOUT)
     def update(self):
-        self.position = api.get_position(self.ticker)
+        self.position = process_api.api.get_position(self.ticker)
         self.side = position.side
         self.qty = int(position.qty)
         self.allowance = float(position.cost_basis)
@@ -28,7 +27,7 @@ class Security:
     @func_set_timeout(TIMEOUT)
     def current_price(self):
         try:
-            market_value = float(api.get_position(self.ticker).current_price)
+            market_value = float(process_api.api.get_position(self.ticker).current_price)
         except:
             logger.log("was not able to get last trade price of {}!".format(self.ticker), 'error')
             raise Exception

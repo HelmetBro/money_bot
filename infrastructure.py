@@ -15,9 +15,11 @@ import logger
 from signal import *
 from func_timeout import FunctionTimedOut
 
-# Alpaca api stuff
+# imported here for main() to ensure account is okay
 import alpaca_trade_api as tradeapi
-api = tradeapi.REST()
+
+# custom trade-api wrapper
+import process_api
 
 TIMEOUT = 9 # seconds for function timeout (Alpaca makes 3 retrys at 3 seconds timeout for each)
 ALPACA_SLEEP_CYCLE = 60 # in seconds. one munite before an api call
@@ -30,6 +32,8 @@ tickers = {'AAPL', 'MSFT', 'TSLA', 'SBUX'}
 child_processes = []
 
 def main():
+    api = tradeapi.REST()
+
     # check all tickers to ensure they're supported by Alpaca
     for ticker in tickers:
         try:
@@ -62,14 +66,15 @@ def start_loop():
     logger.listen()
 
 def work(logging_queue, ticker):
+    # setting up alpaca api wrapper
+    process_api.setup_api()
+
+    # setting up logging
     logger.process_setup(logging_queue)
     logger.log("subprocess for {} started".format(ticker))
     
     # create a security object for each process given the ticker
     sec = security.Security(ticker)
-    # re-create an api session for each process
-    global api
-    api = tradeapi.REST()
     
     while True:
         try:
@@ -77,7 +82,7 @@ def work(logging_queue, ticker):
             time.sleep(ALPACA_SLEEP_CYCLE)
             
             # only run if the market is open
-            if api.get_clock().is_open == False:
+            if process_api.api.get_clock().is_open == False:
                 logger.log("market is closed".format(), 'debug')
                 continue
 
