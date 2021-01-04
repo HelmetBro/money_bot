@@ -34,6 +34,6 @@ class Security:
 
         return market_value
     
-    def max_buy_qty():
+    def max_buy_qty(self):
         print("QTY {}".format(math.floor(security.allowance / self.current_price())))
         return math.floor(security.allowance / self.current_price())
