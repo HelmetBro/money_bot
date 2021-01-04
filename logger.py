@@ -1,6 +1,7 @@
 import os
 import multiprocessing
 import logging
+import time
 
 def main_setup():
     FORMAT = '%(asctime)-15s | %(message)s'

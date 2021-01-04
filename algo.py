@@ -53,9 +53,9 @@ def sell(security):
 
 @func_set_timeout(TIMEOUT)
 def buy_or_sell_macd_rsi(macd_result, rsi_result, security):
-    if macd_result > 0 and rsi_result < 40:
+    if macd_result > 0 and rsi_result < 30:
         buy(security)
-    elif macd_result < 0 and rsi_result > 60:
+    elif macd_result < 0 and rsi_result > 70:
         sell(security)
     else:
         logger.log("{} -> macd: {}, rsi: {}. no trade signal thrown".format(security.ticker, macd_result, rsi_result), 'debug')

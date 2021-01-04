@@ -28,7 +28,7 @@ ALPACA_SLEEP_CYCLE = 60 # in seconds. one munite before an api call
 tickers = {'AAPL', 'MSFT', 'TSLA', 'SBUX'}
 ### TEMP ^
 
-# list of sub-processes for each ticker
+# used only for main process to join() upon termination
 child_processes = []
 
 def main():
@@ -60,8 +60,10 @@ def start_loop():
     # populate processes list with an instance per ticker
     for ticker in tickers:
         process = multiprocessing.Process(target=work, args=(logging_queue, ticker))
-        process.start()
         child_processes.append(process)
+    
+    for process in child_processes:
+        process.start()
 
     logger.listen()
 
@@ -80,7 +82,7 @@ def work(logging_queue, ticker):
         try:
             # wait our desired amount of seconds (as per Alpaca)
             time.sleep(ALPACA_SLEEP_CYCLE)
-            
+
             # only run if the market is open
             if process_api.api.get_clock().is_open == False:
                 logger.log("market is closed".format(), 'debug')
@@ -95,23 +97,34 @@ def work(logging_queue, ticker):
             logger.log("PID: {} TICKER: {} timed out! TIMEOUT = {}".format(os.getpid(), ticker, TIMEOUT), 'error')
             break
 
-        # # wait our desired amount of seconds (as per Alpaca)
-        # time.sleep(ALPACA_SLEEP_CYCLE)
-
     logger.log("PID: {} TICKER: {} is exiting".format(os.getpid(), ticker))
 
-def cleanup(*args):
-    for process in child_processes:
-        print("terminating process {}".format(process.pid))
-        logger.queue.close()
-        process.terminate()
+def sub_process_cleanup(*args):
     os._exit(0)
 
+def main_process_cleanup(*args):
+    print()
+    for child in child_processes:
+        print("terminating child process " + str(child.pid))
+        child.join()
+    print("terminating main process " + str(os.getpid()))
+    os._exit(0)
+
+# child processes
+if __name__ == "__mp_main__":
+    try:
+        for sig in (SIGABRT, SIGINT, SIGTERM):
+            signal(sig, sub_process_cleanup)
+    except Exception as e:
+        print(e)
+        sub_process_cleanup()
+
+# main process
 if __name__ == "__main__":
     try:
         for sig in (SIGABRT, SIGINT, SIGTERM):
-            signal(sig, cleanup)
+            signal(sig, main_process_cleanup)
         main()
     except Exception as e:
-        print(e.message)
-        cleanup()
+        print(e)
+        main_process_cleanup()
