@@ -22,7 +22,7 @@ import alpaca_trade_api as tradeapi
 import process_api
 
 TIMEOUT = 9 # seconds for function timeout (Alpaca makes 3 retrys at 3 seconds timeout for each)
-ALPACA_SLEEP_CYCLE = 60 # in seconds. one munite before an api call
+ALPACA_SLEEP_CYCLE = 2 # in seconds. one munite before an api call
 
 ### TEMP v
 tickers = {'AAPL', 'MSFT', 'TSLA', 'SBUX'}

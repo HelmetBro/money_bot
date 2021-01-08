@@ -11,52 +11,11 @@ import process_api
 TIMEOUT = 9
 
 @func_set_timeout(TIMEOUT)
-def buy(security):
-    if security.qty > 0:
-        logger.log("position already exists with {} shares".format(security.qty), 'debug')
-        return
-
-    # market orders are only avaliable during market hours
-    order = process_api.api.submit_order(
-        symbol=security.ticker,
-        side='buy',
-        type='market',
-        qty=security.max_buy_qty(),
-        time_in_force='ioc') # look into this later
-    if order.status == 'accepted':
-        security.update()
-        logger.log("bought {} shares of {} at avg price of ${} for ${}!".format(
-            security.qty, 
-            ticker, 
-            order.filled_avg_price,
-            security.allowance))
-    else:
-        logger.log("{} buy order was unable to be fulfilled!".format(security.ticker))
-
-@func_set_timeout(TIMEOUT)
-def sell(security):
-    if security.qty == 0:
-        logger.log("no shares for ticker {} exist!".format(security.ticker), 'debug')
-        return
-
-    order_id = process_api.api.submit_order(
-            symbol=security.ticker,
-            side='sell',
-            type='market',
-            qty=str(security.qty),
-            time_in_force='ioc')
-    if order.status == 'accepted':
-        security.update()
-        logger.log("closed position for {}!".format(security.ticker))
-    else:
-        logger.log("{} sell order was unable to be closed!".format(security.ticker))
-
-@func_set_timeout(TIMEOUT)
 def buy_or_sell_macd_rsi(macd_result, rsi_result, security):
-    if macd_result > 0 and rsi_result < 30:
-        buy(security)
-    elif macd_result < 0 and rsi_result > 70:
-        sell(security)
+    if macd_result > 0 and rsi_result < 45:
+        security.buy()
+    elif macd_result < 0 and rsi_result > 55:
+        security.sell()
     else:
         logger.log("{} -> macd: {}, rsi: {}. no trade signal thrown".format(security.ticker, macd_result, rsi_result), 'debug')
 
