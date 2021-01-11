@@ -28,6 +28,12 @@ def listen():
         if log['priority'] == 'warning': logging.warning(log['data'])
         if log['priority'] == 'error': logging.error(log['data'])
         if log['priority'] == 'critical': logging.critical(log['data'])
+        if log['priority'] == 'TERMINATE': raise Exception
 
 def log(data, priority='info'):
     queue.put({'priority': priority, 'data': data})
+
+# called by a child process. onces called, termination from main process is signaled
+def destroy(term_ex):
+    print(term_ex)
+    queue.put({'priority': 'TERMINATE', 'data': 'termination called from child process'})
