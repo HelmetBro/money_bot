@@ -32,8 +32,13 @@ def listen():
 
 def log(data, priority='info'):
     queue.put({'priority': priority, 'data': data})
+def logp(data, priority='info'):
+    print(data)
+    queue.put({'priority': priority, 'data': data})
 
 # called by a child process. onces called, termination from main process is signaled
 def destroy(term_ex):
     print(term_ex)
+    queue.put({'priority': 'TERMINATE', 'data': 'termination called from child process'})
+def destroy():
     queue.put({'priority': 'TERMINATE', 'data': 'termination called from child process'})

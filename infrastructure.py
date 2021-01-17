@@ -5,6 +5,7 @@ import time
 import math
 import datetime
 import pandas
+import backtrader as bt
 
 # custom algorithms
 import algo
@@ -23,6 +24,7 @@ import process_api
 
 TIMEOUT = 9 # seconds for function timeout (Alpaca makes 3 retrys at 3 seconds timeout for each)
 ALPACA_SLEEP_CYCLE = 60 # in seconds. one munite before an api call
+BACKTRADER = True
 
 # TICKERS! TEMP!
 tickers = {'TSLA', 'OGEN', 'RKT', 'CPRX', 'VRTX', 'ATOS', 'ACRX', 'USWS'}
@@ -77,7 +79,14 @@ def work(logging_queue, ticker):
     
     # create a security object for each process given the ticker
     sec = security.Security(ticker)
-    
+
+    if BACKTRADER:
+        # call our run our back
+        import backtrader_infra
+        backtrader_infra.run(ticker)
+        time.sleep(2)
+        logger.destroy()
+
     while True:
         try:
             # wait our desired amount of seconds (as per Alpaca)
@@ -87,12 +96,18 @@ def work(logging_queue, ticker):
             if process_api.api.get_clock().is_open == False:
                 logger.log("market is closed".format(), 'debug')
                 continue
+            
+            # get our time periods
+            end = datetime.datetime.now()
+            start = end - datetime.timedelta(hours=1)
 
-            # calling algorithms and using the last closing price
-            macd_result = algo.macd(ticker)['close']
-            rsi_result = algo.rsi(ticker)['close']
-            algo.buy_or_sell_macd_rsi(macd_result, rsi_result, sec)
-
+            # calling algorithms and make a decision
+            decision = algo.buy_or_sell_macd_rsi(ticker, start, end)
+            if decision == 'buy':
+                sec.buy()
+            if decision == 'sell':
+                sec.sell()
+            
         # except api.requests.exception HTTPError:
         #     logger.log("HTTPS error. retrying on next activation", 'error')
         except FunctionTimedOut as e:

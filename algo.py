@@ -1,5 +1,6 @@
 import datetime
 import pandas
+import data
 import alpaca_trade_api as tradeapi
 api = tradeapi.REST()
 
@@ -11,44 +12,64 @@ import process_api
 TIMEOUT = 9
 
 @func_set_timeout(TIMEOUT)
-def buy_or_sell_macd_rsi(macd_result, rsi_result, security):
-    if macd_result > 0 and rsi_result < 33.33:
-        security.buy()
-    elif macd_result < 0: # and rsi_result > 66.66:
-        security.sell()
+def buy_and_sell_david_custom(ticker, start, end, data=None):
+    # run both strats
+    macd_result = macd(ticker, start, end, data)['close']
+    rsi_result = rsi(ticker, start, end, data)['close']
+    
+    # get our bounds and submit our order
+    upper_bound,lower_bound = get_std_from_ewm(ticker, start, end)
+    macd_limit = -0.0014
+    if macd_result > macd_limit and rsi_result < 30: #33.33:
+        return 'buy_limit_stop',upper_bound,lower_bound # security.buy_david_custom(upper_bound, lower_bound)
     else:
-        logger.log("{} -> macd: {}, rsi: {}. no trade signal thrown".format(security.ticker, macd_result, rsi_result), 'debug')
+        logger.log("{} -> macd: {}, rsi: {}. no trade signal thrown".format(ticker, macd_result, rsi_result), 'debug')
 
-def macd(ticker):
-    # setting time period to grab data (start doesn't matter)
-    end = datetime.datetime.now()
-    start = end - datetime.timedelta(hours=1)
+@func_set_timeout(TIMEOUT)
+def buy_or_sell_macd_rsi(ticker, start, end, data=None):
+    # run both strats
+    macd_result = macd(ticker, start, end, data)['close']
+    rsi_result = rsi(ticker, start, end, data)['close']
+    
+    # make a decision to buy/sell
+    if macd_result > 0 and rsi_result < 33.33:
+        return 'buy'
+    elif macd_result < 0: # and rsi_result > 66.66:
+        return 'sell'
+    
+    # if undesireable, don't make a decision
+    logger.log("{} -> macd: {}, rsi: {}. no trade signal thrown".format(ticker, macd_result, rsi_result), 'debug')
+    return 'none'
 
+def get_std_from_ewm(ticker, start, end):
+    #getting our data and calculating bounds from it
+    history_df = data.get(ticker, 1, 'minute', start, end)
+    upper = history_df['close'].ewm + history_df.std['close'] * 2
+    lower = history_df['close'].ewm - history_df.std['close']
+    return upper,lower
+
+def macd(ticker, start, end, data):
     # calculate long-term EWM
     long_period = 26 # past 26 mintues
-    long_data = process_api.api.polygon.historic_agg_v2(ticker, long_period, 'minute', _from=start, to=end).df
+    long_data = data.get(ticker, long_period, 'minute', start, end, data)
     if long_data.size < long_period:
         return 0 # value that does not activate
     long_ema = pandas.Series.ewm(long_data, span=long_period).mean().iloc[-1]
 
     # calculate short-term EWM
     short_period = 12 # past 12 minutes
-    short_data = process_api.api.polygon.historic_agg_v2(ticker, short_period, 'minute', _from=start, to=end).df
+    short_data = data.get(ticker, short_period, 'minute', start, end, data)
     if short_data.size < short_period:
         return 0
     short_ema = pandas.Series.ewm(short_data, span=short_period).mean().iloc[-1]
 
     return short_ema - long_ema
 
-def rsi(ticker):
-    # setting time period to grab data (start doesn't matter)
-    end = datetime.datetime.now()
-    start = end - datetime.timedelta(hours=1)
-
+def rsi(ticker, start, end, data):
     rsi_period = 14 # past 14 minutes
 
     # grab our ticker prices and grab only the deltas
-    stock_data = process_api.api.polygon.historic_agg_v2(ticker, rsi_period, 'minute', _from=start, to=end).df
+    stock_data = data.get(ticker, rsi_period, 'minute', start, end, data)
     if stock_data.size < rsi_period:
         return 50 # value that does not activate
     delta = stock_data.diff()

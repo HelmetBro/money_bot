@@ -3,6 +3,7 @@ import infrastructure
 from signal import signal, SIGABRT, SIGINT, SIGTERM
 
 
+
 def main_process_cleanup(*args):
     for child in infrastructure.child_processes:
         print("terminating child process " + str(child.pid))

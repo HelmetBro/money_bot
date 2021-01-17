@@ -14,6 +14,26 @@ class Security:
         self.position  = None
 
     @func_set_timeout(TIMEOUT)
+    def buy_david_custom(self, upper_bound, lower_bound):
+        if self.has_position():
+            logger.log("position already exists with {} shares!".format(self.position.qty), 'debug')
+            return
+        # market orders are only avaliable during market hours
+        order = process_api.api.submit_order(
+            symbol=self.ticker,
+            side='buy',
+            type='limit',
+            qty=self.max_buy_qty(), ###later need to consider updating allowance when a sell order executes
+            limit_price=str(self.current_price()+0.01),
+            time_in_force='gtc',
+            order_class='bracket',
+            take_profit={'limit_price': upper_bound},
+            stop_loss={'stop_price': lower_bound})
+        logger.log("submitted buy order for {} shares of {}!".format(
+            order.qty, 
+            self.ticker))
+
+    @func_set_timeout(TIMEOUT)
     def buy(self):
         if self.has_position():
             logger.log("position already exists with {} shares!".format(self.position.qty), 'debug')
