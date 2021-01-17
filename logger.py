@@ -7,7 +7,7 @@ def main_setup():
     FORMAT = '%(asctime)-15s | %(message)s'
     filename = 'history.log'
     if os.path.exists(filename): os.remove(filename)
-    logging.basicConfig(format=FORMAT, filename=filename, level=logging.DEBUG)
+    logging.basicConfig(format=FORMAT, filename=filename, level=logging.INFO)
     queue = multiprocessing.Queue()
     process_setup(queue)
     return queue

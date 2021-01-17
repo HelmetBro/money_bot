@@ -25,7 +25,7 @@ TIMEOUT = 9 # seconds for function timeout (Alpaca makes 3 retrys at 3 seconds t
 ALPACA_SLEEP_CYCLE = 60 # in seconds. one munite before an api call
 
 # TICKERS! TEMP!
-tickers = {'AAPL', 'MSFT', 'TSLA', 'SBUX'}
+tickers = {'TSLA', 'OGEN', 'RKT', 'CPRX', 'VRTX', 'ATOS', 'ACRX', 'USWS'}
 
 # used only for main process to join() upon termination
 child_processes = []
@@ -98,5 +98,6 @@ def work(logging_queue, ticker):
         except FunctionTimedOut as e:
             logger.log("PID: {} TICKER: {} timed out! TIMEOUT = {}, retrying on next activation".format(os.getpid(), ticker, TIMEOUT), 'error')
         except Exception as e:
-            logger.log("PID: {} TICKER: {} is exiting! caught fatal error".format(os.getpid(), ticker), 'critical')
-            logger.destroy(e)
+            logger.log("PID: {} TICKER: {} caught fatal error!".format(os.getpid(), ticker), 'critical')
+            logger.log(e, 'critical')
+            # logger.destroy(e)

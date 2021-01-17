@@ -4,7 +4,7 @@ import alpaca_trade_api as tradeapi
 api = tradeapi.REST()
 
 import logger
-from func_timeout import func_set_timeout, FunctionTimedOut
+from func_timeout import func_set_timeout
 
 import process_api
 
@@ -14,7 +14,7 @@ TIMEOUT = 9
 def buy_or_sell_macd_rsi(macd_result, rsi_result, security):
     if macd_result > 0 and rsi_result < 33.33:
         security.buy()
-    elif macd_result < 0 and rsi_result > 66.66:
+    elif macd_result < 0: # and rsi_result > 66.66:
         security.sell()
     else:
         logger.log("{} -> macd: {}, rsi: {}. no trade signal thrown".format(security.ticker, macd_result, rsi_result), 'debug')
@@ -28,7 +28,7 @@ def macd(ticker):
     long_period = 26 # past 26 mintues
     long_data = process_api.api.polygon.historic_agg_v2(ticker, long_period, 'minute', _from=start, to=end).df
     if long_data.size < long_period:
-        return 0
+        return 0 # value that does not activate
     long_ema = pandas.Series.ewm(long_data, span=long_period).mean().iloc[-1]
 
     # calculate short-term EWM
@@ -50,7 +50,7 @@ def rsi(ticker):
     # grab our ticker prices and grab only the deltas
     stock_data = process_api.api.polygon.historic_agg_v2(ticker, rsi_period, 'minute', _from=start, to=end).df
     if stock_data.size < rsi_period:
-        return 50
+        return 50 # value that does not activate
     delta = stock_data.diff()
     up, down = delta.copy(), delta.copy()
     
