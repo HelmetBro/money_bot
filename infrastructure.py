@@ -24,10 +24,13 @@ import process_api
 
 TIMEOUT = 9 # seconds for function timeout (Alpaca makes 3 retrys at 3 seconds timeout for each)
 ALPACA_SLEEP_CYCLE = 60 # in seconds. one munite before an api call
-BACKTRADER = True
+BACKTRADER = False
 
-# TICKERS! TEMP!
-tickers = {'TSLA', 'OGEN', 'RKT', 'CPRX', 'VRTX', 'ATOS', 'ACRX', 'USWS'}
+# TICKERS! If using backtrader, can only test using a single ticker. :(
+# reason:
+# error while consuming ws messages: Error while connecting to wss://data.alpaca.markets/stream:your connection is rejected while another connection is open under the same account
+# tickers = {'TSLA'}
+tickers = {'CYH', 'NI', 'UEPS', 'RGP', 'WEN', 'OHI', 'VER', 'CHD', 'AKAM', 'DLR', 'WLTW'}
 
 # used only for main process to join() upon termination
 child_processes = []
@@ -75,7 +78,7 @@ def work(logging_queue, ticker):
     # setting up logging/signals
     signal(SIGINT, SIG_IGN)
     logger.process_setup(logging_queue)
-    logger.log("subprocess for {} started".format(ticker))
+    logger.logp("subprocess for {} started".format(ticker))
     
     # create a security object for each process given the ticker
     sec = security.Security(ticker)
@@ -90,19 +93,17 @@ def work(logging_queue, ticker):
     while True:
         try:
             # wait our desired amount of seconds (as per Alpaca)
-            time.sleep(ALPACA_SLEEP_CYCLE)
+            # time.sleep(ALPACA_SLEEP_CYCLE)
+            time.sleep(0.1)
 
             # only run if the market is open
-            if process_api.api.get_clock().is_open == False:
-                logger.log("market is closed".format(), 'debug')
-                continue
-            
-            # get our time periods
-            end = datetime.datetime.now()
-            start = end - datetime.timedelta(hours=1)
+            # if process_api.api.get_clock().is_open == False:
+            #     logger.log("market is closed".format(), 'debug')
+            #     continue
 
             # calling algorithms and make a decision
-            decision = algo.buy_or_sell_macd_rsi(ticker, start, end)
+            # decision = algo.buy_or_sell_macd_rsi(ticker)
+            decision = algo.buy_and_sell_david_custom(ticker)
             if decision == 'buy':
                 sec.buy()
             if decision == 'sell':
