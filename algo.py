@@ -6,7 +6,7 @@ from func_timeout import func_set_timeout
 TIMEOUT = 9
 
 @func_set_timeout(TIMEOUT)
-def buy_and_sell_david_custom(security):
+def buy_and_sell_david_custom(security, trader=None):
     # run both strats
     macd_result = macd(security.ticker)['close']
     rsi_result = rsi(security.ticker)['close']
@@ -16,19 +16,10 @@ def buy_and_sell_david_custom(security):
     upper_bound,lower_bound = get_std_from_ewm(security.ticker, std_period) # uses last 20 minutes of data to calculate ewm
     if upper_bound == None or lower_bound == None: return
 
-    # print('ORDER:')
-    # print(upper_bound)
-    # print(backtrader_setup.data_frame['close'][0])
-    # print(lower_bound)
-
     # make a decision to buy/sell
     macd_limit = -0.0014
-    print()
-    print(macd_result)
-    print(rsi_result)
     if macd_result > macd_limit and rsi_result < 33.33:
-        print("WE GOT HERE")
-        return security.buy_david_custom(upper_bound,lower_bound)
+        return security.buy_david_custom(upper_bound,lower_bound, trader)
     
     logger.log("{} -> macd: {}, rsi: {}. no trade signal thrown".format(security.ticker, macd_result, rsi_result), 'debug')
 

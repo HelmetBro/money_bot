@@ -20,7 +20,7 @@ class DavidStrat(bt.Strategy):
 		if self.orefs:
 			return  # pending orders do nothing
 		if self.position:
-			return 
+			return # current positions don't submit orders
 
 		data_size = len(self.data.close)
 		if data_size < 50:
@@ -38,24 +38,10 @@ class DavidStrat(bt.Strategy):
 
 		global data_frame
 		data_frame = pd.DataFrame(prices, columns = ['open','high','low','close','volume','vwap'], dtype=float) # index = ['timestamp']
-		global strategy
-		strategy = self
 		
-		order = algo.buy_and_sell_david_custom(security)
-		logger.log(order)
+		order = algo.buy_and_sell_david_custom(security, self)
 		if order is not None:
 			self.orefs = [o.ref for o in order]
-
-# order = process_api.api.submit_order(
-# 			symbol=self.ticker,
-# 			side='buy',
-# 			type='limit',
-# 			qty=self.max_buy_qty(), ###later need to consider updating allowance when a sell order executes
-# 			limit_price=str(self.current_price()+0.01),
-# 			time_in_force='gtc',
-# 			order_class='bracket',
-# 			take_profit={'limit_price': upper_bound},
-# 			stop_loss={'stop_price': lower_bound})
 
 def run(sec):
 	global security

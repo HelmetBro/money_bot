@@ -14,14 +14,13 @@ class Security:
         self.position  = None
 
     @func_set_timeout(TIMEOUT)
-    def buy_david_custom(self, upper_bound, lower_bound):
+    def buy_david_custom(self, upper_bound, lower_bound, trader=None):
         if backtrader_setup.BACKTRADER:
-            print('ORDER:')
-            print(upper_bound)
-            print(lower_bound)
-            return backtrader_setup.strategy.buy_bracket(
+            if trader is None:
+                raise Exception("trader cannot be None when backtrading!")
+            return trader.buy_bracket(
                 limitprice=upper_bound,
-                price=backtrader_setup.data_frame['close'],
+                price=backtrader_setup.data_frame['close'][0],
                 stopprice=lower_bound)
 
         if self.has_position():
