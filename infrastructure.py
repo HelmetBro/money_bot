@@ -1,11 +1,8 @@
 import os
 import multiprocessing
-import logging
 import time
-import math
-import datetime
-import pandas
-import backtrader as bt
+import traceback
+import backtrader_setup
 
 # custom algorithms
 import algo
@@ -24,13 +21,12 @@ import process_api
 
 TIMEOUT = 9 # seconds for function timeout (Alpaca makes 3 retrys at 3 seconds timeout for each)
 ALPACA_SLEEP_CYCLE = 60 # in seconds. one munite before an api call
-BACKTRADER = False
 
 # TICKERS! If using backtrader, can only test using a single ticker. :(
 # reason:
 # error while consuming ws messages: Error while connecting to wss://data.alpaca.markets/stream:your connection is rejected while another connection is open under the same account
-# tickers = {'TSLA'}
-tickers = {'CYH', 'NI', 'UEPS', 'RGP', 'WEN', 'OHI', 'VER', 'CHD', 'AKAM', 'DLR', 'WLTW'}
+# tickers = {'CYH', 'NI', 'UEPS', 'RGP', 'WEN', 'OHI', 'VER', 'CHD', 'AKAM', 'DLR', 'WLTW'}
+tickers = {'TSLA'} 
 
 # used only for main process to join() upon termination
 child_processes = []
@@ -83,37 +79,39 @@ def work(logging_queue, ticker):
     # create a security object for each process given the ticker
     sec = security.Security(ticker)
 
-    if BACKTRADER:
-        # call our run our back
-        import backtrader_infra
-        backtrader_infra.run(ticker)
-        time.sleep(2)
-        logger.destroy()
+    if backtrader_setup.BACKTRADER:
+        # call our bracktrader and exit
+        try:
+            backtrader_setup.run(sec)
+            time.sleep(2)
+            logger.destroy()
+            return
+        except Exception as e:
+            print(e)
+            traceback.print_exc()
+            return
 
     while True:
         try:
             # wait our desired amount of seconds (as per Alpaca)
-            # time.sleep(ALPACA_SLEEP_CYCLE)
-            time.sleep(0.1)
+            time.sleep(ALPACA_SLEEP_CYCLE)
 
             # only run if the market is open
-            # if process_api.api.get_clock().is_open == False:
-            #     logger.log("market is closed".format(), 'debug')
-            #     continue
+            if process_api.api.get_clock().is_open == False:
+                logger.log("market is closed".format(), 'debug')
+                continue
 
             # calling algorithms and make a decision
-            # decision = algo.buy_or_sell_macd_rsi(ticker)
-            decision = algo.buy_and_sell_david_custom(ticker)
-            if decision == 'buy':
-                sec.buy()
-            if decision == 'sell':
-                sec.sell()
+            algo.buy_and_sell_david_custom(sec)
+            # algo.buy_or_sell_macd_rsi(sec)
             
         # except api.requests.exception HTTPError:
         #     logger.log("HTTPS error. retrying on next activation", 'error')
         except FunctionTimedOut as e:
             logger.log("PID: {} TICKER: {} timed out! TIMEOUT = {}, retrying on next activation".format(os.getpid(), ticker, TIMEOUT), 'error')
         except Exception as e:
-            logger.log("PID: {} TICKER: {} caught fatal error!".format(os.getpid(), ticker), 'critical')
-            logger.log(e, 'critical')
+            logger.log("PID: {} TICKER: {} caught error!".format(os.getpid(), ticker), 'critical')
+            logger.logp(e, 'critical')
+            logger.log(e.__traceback__)
+            traceback.print_exc()
             # logger.destroy(e)

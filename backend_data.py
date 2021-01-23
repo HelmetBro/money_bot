@@ -1,21 +1,21 @@
+import backtrader
 import process_api
 import datetime
 import pytz
-import logger
+import backtrader_setup
 
-def get(ticker, period, interval, timespan, data=None, end_date=None):
-    start,end = get_time_periods(period * interval, end_date, timespan)
-    if data != None: # then we must be backtrading
-        return data 
-    else:
-        return process_api.api.polygon.historic_agg_v2(ticker, interval, timespan, _from=start, to=end, limit=period).df
+def get(ticker, period, interval, timespan):
+    # if we're backtrading, we already have set start/end dates. just return what we already computed
+    if backtrader_setup.BACKTRADER:
+        return backtrader_setup.data_frame[0:period]
+
+    start,end = get_time_periods(period * interval, timespan)
+    return process_api.api.polygon.historic_agg_v2(ticker, interval, timespan, _from=start, to=end, limit=period).df
 
 ### helper function
-def get_time_periods(delta, end_date=None, timespan='minute'):
-    end = end_date
+def get_time_periods(delta, timespan='minute'):
+    end = datetime.datetime.now(tz=pytz.timezone('US/Eastern'))
     start = None
-    if end_date == None:
-        end = datetime.datetime.now(tz=pytz.timezone('US/Eastern'))
     # should try to use non-plural, as it's what Alpaca API uses
     if timespan == 'seconds' or timespan == 'second':
         start = end - datetime.timedelta(seconds=delta)
