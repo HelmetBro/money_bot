@@ -2,7 +2,7 @@ import os
 import multiprocessing
 import logging
 
-LOG_LEVEL = logging.INFO
+LOG_LEVEL = logging.DEBUG
 
 def main_setup():
     FORMAT = '%(asctime)-15s | %(message)s'

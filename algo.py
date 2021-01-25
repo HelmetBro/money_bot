@@ -1,4 +1,3 @@
-import backtrader_setup
 import backend_data
 import logger
 from func_timeout import func_set_timeout
@@ -8,7 +7,7 @@ TIMEOUT = 9
 @func_set_timeout(TIMEOUT)
 def buy_and_sell_david_custom(security, trader=None):
     # run both strats
-    macd_result = macd(security.ticker)['close']
+    macd_signal_result = macd_with_signal(security.ticker)['close']
     rsi_result = rsi(security.ticker)['close']
 
     # get our bounds, check if we have enough data already
@@ -17,26 +16,28 @@ def buy_and_sell_david_custom(security, trader=None):
     if upper_bound == None or lower_bound == None: return
 
     # make a decision to buy/sell
-    macd_limit = -0.0014
-    if macd_result > macd_limit and rsi_result < 33.33:
+    macd_signal_limit = -0.0014
+    if macd_signal_result > macd_signal_limit and rsi_result < 30: #33.33:
         return security.buy_david_custom(upper_bound,lower_bound, trader)
     
-    logger.log("{} -> macd: {}, rsi: {}. no trade signal thrown".format(security.ticker, macd_result, rsi_result), 'debug')
+    logger.log("{} -> macd_signal: {}, rsi: {} so no trade signal thrown".format(
+        security.ticker, macd_signal_result, rsi_result), 'debug')
 
 @func_set_timeout(TIMEOUT)
-def buy_or_sell_macd_rsi(security):
+def buy_or_sell_macd_rsi(security, trader=None):
     # run both strats
-    macd_result = macd(security.ticker)['close'] 
+    macd_signal_result = macd_with_signal(security.ticker)['close'] 
     rsi_result = rsi(security.ticker)['close'] 
 
     # make a decision to buy/sell
-    if macd_result > 0 and rsi_result < 33.33:
-        security.buy()
-    elif macd_result < 0 and rsi_result > 66.66:
-        security.sell()
+    if macd_signal_result > 0 and rsi_result < 33.33:
+        return security.buy(trader)
+    elif macd_signal_result < 0 and rsi_result > 66.66:
+        return security.sell(trader)
     
     # if undesireable, don't make a decision
-    logger.log("{} -> macd: {}, rsi: {}. no trade signal thrown".format(security.ticker, macd_result, rsi_result), 'debug')
+    logger.log("{} -> macd_signal: {}, rsi: {} so no trade signal thrown".format(
+        security.ticker, macd_signal_result, rsi_result), 'debug')
 
 def get_std_from_ewm(ticker, period, interval=1, timespan='minute'):
     # getting our data and calculating our bounds from it
@@ -49,22 +50,29 @@ def get_std_from_ewm(ticker, period, interval=1, timespan='minute'):
     lower = ewm - history_df['close'].std()
     return upper,lower
 
-def macd(ticker, interval=1, timespan='minute'):
+def macd_with_signal(ticker, interval=1, timespan='minute'):
     # calculate long-term EWM
     long_period = 26 # past 26 mintues
     long_data = backend_data.get(ticker, long_period, interval, timespan)
     if len(long_data.index) < long_period:
         raise Exception("insufficient data [macd long]")
-    long_ema = long_data.ewm(long_period).mean().iloc[-1]
-    
+    long_ema = long_data.ewm(long_period, adjust=False).mean().iloc[-1]
+
     # calculate short-term EWM
     short_period = 12 # past 12 minutes
     short_data = backend_data.get(ticker, short_period, interval, timespan)
     if len(short_data.index) < short_period:
         raise Exception("insufficient data [macd short]")
-    short_ema = short_data.ewm(short_period).mean().iloc[-1]
+    short_ema = short_data.ewm(short_period, adjust=False).mean().iloc[-1]
 
-    return short_ema - long_ema
+    # macd line. this is to be compared to signal line
+    macd = short_ema - long_ema
+
+    # this calculates our signal line
+    ema_period = 9
+    ema = macd.ewm(span=ema_period, adjust=False).mean()
+
+    return ema - macd
 
 def rsi(ticker, interval=1, timespan='minute'):
     rsi_period = 14 # past 14 minutes

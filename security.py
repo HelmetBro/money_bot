@@ -2,6 +2,7 @@ import logger
 import math
 import backtrader_setup
 import process_api
+import backtrader
 
 from func_timeout import func_set_timeout
 TIMEOUT = 9
@@ -43,7 +44,19 @@ class Security:
         return order
 
     @func_set_timeout(TIMEOUT)
-    def buy(self):
+    def buy(self, trader=None):
+        if backtrader_setup.BACKTRADER:
+            if trader is None:
+                print('WHAT HUH')
+                raise Exception("trader cannot be None when backtrading!")
+            if trader.position:
+                return # current positions don't submit buy orders
+            logger.log("submitted buy order for {} at {}!".format(self.ticker, backtrader_setup.data_frame['close'][0]))
+            return trader.buy()
+            # return trader.buy(
+            #     price=backtrader_setup.data_frame['open'][0],
+            #     exectype=backtrader.Order.Limit)
+
         if self.has_position():
             logger.log("position already exists with {} shares!".format(self.position.qty), 'debug')
             return
@@ -59,7 +72,18 @@ class Security:
             self.ticker))
 
     @func_set_timeout(TIMEOUT)
-    def sell(self):
+    def sell(self, trader=None):
+        if backtrader_setup.BACKTRADER:
+            if trader is None:
+                raise Exception("trader cannot be None when backtrading!")
+            if not trader.position:
+                return # current positions don't submit sell orders
+            logger.log("submitted sell order for {} at {}!".format(self.ticker, backtrader_setup.data_frame['close'][0]))
+            return trader.sell()
+            # return trader.sell(
+            #     price=backtrader_setup.data_frame['open'][0],
+            #     exectype=backtrader.Order.Limit)
+
         if not self.has_position():
             logger.log("no shares for ticker {} exist!".format(self.ticker), 'debug')
             return
