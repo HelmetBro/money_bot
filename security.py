@@ -2,8 +2,8 @@ import logger
 import math
 import backtrader_setup
 import process_api
-import backtrader
-
+import backtrader as bt
+from datetime import timedelta
 from func_timeout import func_set_timeout
 TIMEOUT = 9
 
@@ -22,11 +22,18 @@ class Security:
 			if trader.position:
 				return # current positions don't submit buy orders
 			# if we have a pending order for too long, 
-			return trader.buy_bracket(
-			    size=int(trader.broker.get_cash() / backtrader_setup.data_frame['close'][0]),
-			    limitprice=upper_bound,
-			    price=backtrader_setup.data_frame['close'][0] + 0.10,
-			    stopprice=lower_bound)
+			mainside = trader.buy(transmit=False, size=int(trader.broker.get_cash() / backtrader_setup.data_frame['close'][0]))
+			lowside  = trader.sell(price=lower_bound, size=mainside.size, exectype=bt.Order.Stop,
+								transmit=False, parent=mainside)
+			highside = trader.sell(price=upper_bound, size=mainside.size, exectype=bt.Order.Limit,
+								transmit=True, parent=mainside)
+			return [lowside, mainside, highside]
+				# return trader.buy_bracket(
+			    # size=int(trader.broker.get_cash() / backtrader_setup.data_frame['close'][0]),
+				# # valid=10,#timedelta(minutes=5),
+			    # limitprice=upper_bound,
+			    # price=backtrader_setup.data_frame['close'][0] + 0.10,
+			    # stopprice=lower_bound)
 
 		if self.has_position():
 			logger.log("position already exists with {} shares!".format(self.position.qty), 'debug')

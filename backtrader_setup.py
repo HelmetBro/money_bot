@@ -6,9 +6,9 @@ import pandas as pd
 import logger
 from datetime import datetime
 
-BACKTRADER = True
-START_DATE = datetime(2016,3,21) # year, month, day
-END_DATE = datetime(2016,4,10)	
+BACKTRADER = False
+START_DATE = datetime(2011,3,21) # year, month, day
+END_DATE = datetime(2020,4,10)	
 
 class DavidStrat(bt.Strategy):
 	params = (('security', None),)
@@ -33,13 +33,11 @@ class DavidStrat(bt.Strategy):
 		elif order.status in [order.Canceled, order.Margin, order.Rejected]:
 			logger.logp('order canceled/margin/rejected')
 
-		if not order.alive() and order.ref in self.open_orders:
-			self.open_orders.remove(order.ref)
+		if not order.alive() and order in self.open_orders:
+			self.open_orders.remove(order)
 
 	def next(self):
 		if len(self.open_orders) > 0:
-			print(self.open_orders[0])
-			print("skipped :(")
 			return
 
 		data_size = len(self.data.close)
@@ -64,9 +62,9 @@ class DavidStrat(bt.Strategy):
 
 		if order is not None:
 			if isinstance(order, list):
-				self.open_orders = [o.ref for o in order]
+				self.open_orders = [o for o in order]
 			else:
-				self.open_orders.append(order.ref)
+				self.open_orders.append(order)
 
 def run(security):
 	# grabbing our data from specified time periods (API HTTPS call)
