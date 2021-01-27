@@ -12,13 +12,13 @@ def buy_and_sell_david_custom(security, trader=None):
 
     # get our bounds, check if we have enough data already
     std_period = 20
-    upper_bound,ewm,lower_bound = bounds_from_ewm(security.ticker, std_period) # uses last 20 minutes of data to calculate ewm
-    if upper_bound == None or lower_bound == None: return
+    std = std_from_ewm(security.ticker, std_period) # uses last 20 minutes of data to calculate ewm
+    if std is None: return
 
     # make a decision to buy/sell
     macd_signal_limit = -0.0014
     if macd_signal_result > macd_signal_limit and rsi_result < 30: #33.33:
-        return security.buy_david_custom(upper_bound, ewm, lower_bound, trader)
+        return security.buy_david_custom(std, trader)
     
     logger.log("{} -> macd_signal: {}, rsi: {} so no trade signal thrown".format(
         security.ticker, macd_signal_result, rsi_result), 'debug')
@@ -39,16 +39,16 @@ def buy_or_sell_macd_rsi(security, trader=None):
     logger.log("{} -> macd_signal: {}, rsi: {} so no trade signal thrown".format(
         security.ticker, macd_signal_result, rsi_result), 'debug')
 
-def bounds_from_ewm(ticker, period, interval=1, timespan='minute'):
+def std_from_ewm(ticker, period, interval=1, timespan='minute'):
     # getting our data and calculating our bounds from it
     history_df = backend_data.get(ticker, period, interval, timespan)
     if len(history_df.index) < period:
         raise Exception("insufficient data [std upper/lower]")  
 
-    ewm = history_df['close'].ewm(period).mean().iloc[-1]
-    upper = ewm + history_df['close'].std() * 2
-    lower = ewm - history_df['close'].std()
-    return upper,ewm,lower
+    # ewm = history_df['close'].ewm(period).mean().iloc[-1]
+    # upper = ewm + history_df['close'].std() * 2
+    # lower = ewm - history_df['close'].std()
+    return history_df['close'].std()
 
 def macd_with_signal(ticker, interval=1, timespan='minute'):
     # calculate long-term EWM

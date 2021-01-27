@@ -15,7 +15,7 @@ class Security:
 		self.position  = None
 
 	@func_set_timeout(TIMEOUT)
-	def buy_david_custom(self, upper_bound, ewm, lower_bound, trader=None):
+	def buy_david_custom(self, std, trader=None):
 		if backtrader_setup.BACKTRADER:
 			if trader is None:
 				raise Exception("trader cannot be None when backtrading!")
@@ -39,15 +39,18 @@ class Security:
 			logger.log("position already exists with {} shares!".format(self.position.qty), 'debug')
 			return
 		# market orders are only avaliable during market hours
+		price = self.current_price()
+		upper_bound = price + std * 2
+		lower_bound = price - std
 		order = process_api.api.submit_order(
 			symbol=self.ticker,
 			side='buy',
 			type='limit',
-			qty=self.max_buy_qty(ewm), ###later need to consider updating allowance when a sell order executes
+			qty=self.max_buy_qty(price), ###later need to consider updating allowance when a sell order executes
 			time_in_force='gtc',
 			order_class='bracket',
-			limit_price=str(ewm),
-			take_profit={'limit_price': upper_bound + 0.05},
+			limit_price=str(price),
+			take_profit={'limit_price': upper_bound},
 			stop_loss={'stop_price': lower_bound, "limit_price": lower_bound - 0.05})
 		logger.log("submitted buy order for {} shares of {}!".format(
 			order.qty, 

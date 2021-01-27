@@ -25,8 +25,8 @@ ALPACA_SLEEP_CYCLE = 60 # in seconds. one munite before an api call
 # TICKERS! If using backtrader, can only test using a single ticker. :(
 # reason:
 # error while consuming ws messages: Error while connecting to wss://data.alpaca.markets/stream:your connection is rejected while another connection is open under the same account
-# tickers = {'GOVX', 'TGC', 'IDEX', 'PLTR', 'CNSP', 'USX', 'GRNQ', 'VISL', 'TRXC'}
-tickers = {'TSLA'}
+tickers = {'GOVX', 'TGC', 'IDEX', 'PLTR', 'CNSP', 'USX', 'GRNQ', 'VISL', 'TRXC'}
+# tickers = {'TSLA'}
 
 # used only for main process to join() upon termination
 child_processes = []
@@ -115,3 +115,5 @@ def work(logging_queue, ticker):
             logger.log(e.__traceback__)
             traceback.print_exc()
             # logger.destroy(e)
+        except:
+            logger.logp("special error was thrown", 'critical')
