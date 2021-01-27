@@ -15,7 +15,7 @@ class Security:
 		self.position  = None
 
 	@func_set_timeout(TIMEOUT)
-	def buy_david_custom(self, upper_bound, lower_bound, trader=None):
+	def buy_david_custom(self, upper_bound, ewm, lower_bound, trader=None):
 		if backtrader_setup.BACKTRADER:
 			if trader is None:
 				raise Exception("trader cannot be None when backtrading!")
@@ -43,10 +43,10 @@ class Security:
 			symbol=self.ticker,
 			side='buy',
 			type='limit',
-			qty=self.max_buy_qty(), ###later need to consider updating allowance when a sell order executes
+			qty=self.max_buy_qty(ewm), ###later need to consider updating allowance when a sell order executes
 			time_in_force='gtc',
 			order_class='bracket',
-			limit_price=str(self.current_price()),
+			limit_price=str(ewm),
 			take_profit={'limit_price': upper_bound + 0.05},
 			stop_loss={'stop_price': lower_bound, "limit_price": lower_bound - 0.05})
 		logger.log("submitted buy order for {} shares of {}!".format(
@@ -123,7 +123,8 @@ class Security:
 			raise Exception
 		return market_value
 	
-	def max_buy_qty(self):
+	def max_buy_qty(self, price=None):
+		if price is not None: return math.floor(self.allowance / price)
 		return math.floor(self.allowance / self.current_price())
 
 	def is_negative_profit(self):
