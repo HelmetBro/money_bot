@@ -20,7 +20,7 @@ def process_setup(logging_queue):
     global queue
     queue = logging_queue
 
-def listen():
+async def listen():
     # listen to any logging requests, and populate our log file using a mutex
     while True:
         log = queue.get()
@@ -29,7 +29,7 @@ def listen():
         if log['priority'] == 'warning': logging.warning(log['data'])
         if log['priority'] == 'error': logging.error(log['data'])
         if log['priority'] == 'critical': logging.critical(log['data'])
-        if log['priority'] == 'TERMINATE': raise Exception
+        if log['priority'] == 'TERMINATE': raise Exception("raised by TERMINATE")
 
 def log(data, priority='info'):
     queue.put({'priority': priority, 'data': data})

@@ -3,6 +3,7 @@ import multiprocessing
 import time
 import traceback
 import backtrader_setup
+import asyncio
 
 # custom algorithms
 import algo
@@ -15,24 +16,50 @@ from func_timeout import FunctionTimedOut
 
 # imported here for main() to ensure account is okay
 import alpaca_trade_api as tradeapi
+from alpaca_trade_api import StreamConn
+api = tradeapi.REST()
+conn = StreamConn()
 
 # custom trade-api wrapper
 import process_api
 
 TIMEOUT = 9 # seconds for function timeout (Alpaca makes 3 retrys at 3 seconds timeout for each)
-ALPACA_SLEEP_CYCLE = 60 # in seconds. one munite before an api call
+ALPACA_SLEEP_CYCLE = 60 # in seconds. one minute before an api call
 
-# TICKERS! If using backtrader, can only test using a single ticker. :(
-# reason:
-# error while consuming ws messages: Error while connecting to wss://data.alpaca.markets/stream:your connection is rejected while another connection is open under the same account
+# tickers = {'BBBY', 'GME', 'NOK', 'AMC', 'SNDL', 'NAKD', 'CTRM', 'TRCH', 'IDEX', 'CCIV'}
 tickers = {'GOVX', 'TGC', 'IDEX', 'PLTR', 'CNSP', 'USX', 'GRNQ', 'VISL', 'TRXC'}
 # tickers = {'TSLA'}
 
-# used only for main process to join() upon termination
+# used only for main process to join() upon termination. do NOT use a process pool
 child_processes = []
 
+# pipe later created by multiprocessing to access 
+account_update_streams = []
+status_update_streams  = []
+minute_update_streams  = []
+second_update_streams  = []
+
+@conn.on(r'^trade_updates$')
+async def on_account_updates(conn, channel, account):
+    for stream in account_update_streams:
+        stream.send(account)
+
+@conn.on(r'^status$')
+async def on_status(conn, channel, data):
+    for stream in status_update_streams:
+        stream.send(data)
+
+@conn.on(r'^AM$')
+async def on_minute_bars(conn, channel, bar):
+    for stream in minute_update_streams:
+        stream.send(bar)
+
+@conn.on(r'^A$')
+async def on_second_bars(conn, channel, bar):
+    for stream in second_update_streams:
+        stream.send(bar)
+
 def main():
-    api = tradeapi.REST()
 
     # check all tickers to ensure they're supported by Alpaca
     for ticker in tickers:
@@ -53,21 +80,54 @@ def main():
     # starting our main process
     start_loop()
 
+    # conn.run(['trade_updates', 'alpacadatav1/AM.SPY'])
+
+
+
 def start_loop():
     logging_queue = logger.main_setup()
     logger.log("starting main loop")
 
     # populate processes list with an instance per ticker
     for ticker in tickers:
-        process = multiprocessing.Process(target=work, args=(logging_queue, ticker))
+        global account_update_streams
+        global status_update_streams
+        global minute_update_streams
+        global second_update_streams
+        account_reader, account_writer = multiprocessing.Pipe()
+        status_reader, status_writer   = multiprocessing.Pipe()
+        minute_reader, minute_writer   = multiprocessing.Pipe()
+        second_reader, second_writer   = multiprocessing.Pipe()
+        account_update_streams.append(account_writer)
+        status_update_streams.append(status_writer)
+        minute_update_streams.append(minute_writer)
+        second_update_streams.append(second_writer)
+        process = multiprocessing.Process(target=work, args=(
+            logging_queue,
+            account_reader,
+            status_reader,
+            minute_reader,
+            second_reader,
+            ticker))
         child_processes.append(process)
-    
+
+    # logger.listen()
+    log_loop = asyncio.new_event_loop()
+    log_loop.run_forever(logger.listen())
+    asyncio.set_event_loop(log_loop)
+
     for process in child_processes:
         process.start()
 
-    logger.listen()
 
-def work(logging_queue, ticker):
+
+def work(logging_queue, 
+         account_updates,
+         status_writer,
+         minute_writer,
+         second_writer,
+         ticker):
+    
     # setting up alpaca api wrapper
     process_api.setup_api()
 
@@ -75,7 +135,7 @@ def work(logging_queue, ticker):
     signal(SIGINT, SIG_IGN)
     logger.process_setup(logging_queue)
     logger.logp("subprocess for {} started".format(ticker))
-    
+
     # create a security object for each process given the ticker
     sec = security.Security(ticker)
 

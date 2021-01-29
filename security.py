@@ -29,11 +29,11 @@ class Security:
 								transmit=True, parent=mainside)
 			return [lowside, mainside, highside]
 				# return trader.buy_bracket(
-			    # size=int(trader.broker.get_cash() / backtrader_setup.data_frame['close'][0]),
+				# size=int(trader.broker.get_cash() / backtrader_setup.data_frame['close'][0]),
 				# # valid=10,#timedelta(minutes=5),
-			    # limitprice=upper_bound,
-			    # price=backtrader_setup.data_frame['close'][0] + 0.10,
-			    # stopprice=lower_bound)
+				# limitprice=upper_bound,
+				# price=backtrader_setup.data_frame['close'][0] + 0.10,
+				# stopprice=lower_bound)
 
 		if self.has_position():
 			logger.log("position already exists with {} shares!".format(self.position.qty), 'debug')
