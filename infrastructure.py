@@ -1,13 +1,9 @@
+from macd_rsi import macd_rsi
 import os
 import multiprocessing
-import time
+import threading
 import traceback
-import backtrader_setup
-import asyncio
-
-# custom algorithms
-import algo
-import security
+import transaction
 
 # errors, signals, logging, etc
 import logger
@@ -19,9 +15,6 @@ import alpaca_trade_api as tradeapi
 from alpaca_trade_api import StreamConn
 api = tradeapi.REST()
 conn = StreamConn()
-
-# custom trade-api wrapper
-import process_api
 
 TIMEOUT = 9 # seconds for function timeout (Alpaca makes 3 retrys at 3 seconds timeout for each)
 ALPACA_SLEEP_CYCLE = 60 # in seconds. one minute before an api call
@@ -80,13 +73,11 @@ def main():
     # starting our main process
     start_loop()
 
-    # conn.run(['trade_updates', 'alpacadatav1/AM.SPY'])
-
-
-
 def start_loop():
     logging_queue = logger.main_setup()
-    logger.log("starting main loop")
+    logger.logp("starting main loop")
+
+    parent_order_pipe, child_order_pipe = multiprocessing.Pipe()
 
     # populate processes list with an instance per ticker
     for ticker in tickers:
@@ -104,6 +95,7 @@ def start_loop():
         second_update_streams.append(second_writer)
         process = multiprocessing.Process(target=work, args=(
             logging_queue,
+            child_order_pipe,
             account_reader,
             status_reader,
             minute_reader,
@@ -111,69 +103,47 @@ def start_loop():
             ticker))
         child_processes.append(process)
 
-    # logger.listen()
-    log_loop = asyncio.new_event_loop()
-    log_loop.run_forever(logger.listen())
-    asyncio.set_event_loop(log_loop)
+    # thread to initiate logging
+    logger_thread = threading.Thread(target=logger.listen, daemon=True)
+    logger_thread.start()
+
+    # thread to initiate api requests
+    api_thread = threading.Thread(target=transaction.listen, args=(parent_order_pipe), daemon=True)
+    api_thread.start()
 
     for process in child_processes:
         process.start()
 
-
+    conn.run(['trade_updates', 'alpacadatav1/AM.SPY']) # later change this to watch all tickers
 
 def work(logging_queue, 
+         order_pipe,
          account_updates,
-         status_writer,
-         minute_writer,
-         second_writer,
+         status_updates,
+         minute_updates,
+         second_updates,
          ticker):
-    
-    # setting up alpaca api wrapper
-    process_api.setup_api()
 
     # setting up logging/signals
-    signal(SIGINT, SIG_IGN)
+    signal(SIGINT, SIG_IGN) # ignore all interupts on sub processes
     logger.process_setup(logging_queue)
     logger.logp("subprocess for {} started".format(ticker))
 
-    # create a security object for each process given the ticker
-    sec = security.Security(ticker)
+    algorithm = macd_rsi(ticker,
+                         order_pipe,
+                         account_updates,
+                         status_updates,
+                         minute_updates,
+                         second_updates)
 
-    if backtrader_setup.BACKTRADER:
-        # call our bracktrader and exit
-        try:
-            backtrader_setup.run(sec)
-            time.sleep(2)
-            logger.destroy()
-            return
-        except Exception as e:
-            print(e)
-            traceback.print_exc()
-            return
-
-    while True:
-        try:
-            # wait our desired amount of seconds (as per Alpaca)
-            time.sleep(ALPACA_SLEEP_CYCLE)
-
-            # only run if the market is open
-            if process_api.api.get_clock().is_open == False:
-                logger.log("market is closed".format(), 'debug')
-                continue
-
-            # calling algorithms and make a decision
-            algo.buy_and_sell_david_custom(sec)
-            # algo.buy_or_sell_macd_rsi(sec)
-            
-        # except api.requests.exception HTTPError:
-        #     logger.log("HTTPS error. retrying on next activation", 'error')
-        except FunctionTimedOut as e:
-            logger.log("PID: {} TICKER: {} timed out! TIMEOUT = {}, retrying on next activation".format(os.getpid(), ticker, TIMEOUT), 'error')
-        except Exception as e:
-            logger.log("PID: {} TICKER: {} caught error!".format(os.getpid(), ticker), 'critical')
-            logger.logp(e, 'critical')
-            logger.log(e.__traceback__)
-            traceback.print_exc()
-            # logger.destroy(e)
-        except:
-            logger.logp("special error was thrown", 'critical')
+    try:
+        algorithm.run()
+    except FunctionTimedOut as e:
+        logger.log("PID: {} TICKER: {} timed out! TIMEOUT = {}, retrying on next activation".format(os.getpid(), ticker, TIMEOUT), 'error')
+    except Exception as e:
+        logger.log("PID: {} TICKER: {} caught error!".format(os.getpid(), ticker), 'critical')
+        logger.logp(e, 'critical')
+        logger.log(e.__traceback__)
+        traceback.print_exc()
+    except:
+        logger.logp("special error was thrown", 'critical')

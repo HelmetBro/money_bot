@@ -1,8 +1,11 @@
 import backtrader
-import process_api
 import datetime
 import pytz
 import backtrader_setup
+
+
+
+
 
 def get(ticker, period, interval, timespan):
     # if we're backtrading, we already have set start/end dates. just return what we already computed
@@ -10,7 +13,7 @@ def get(ticker, period, interval, timespan):
         return backtrader_setup.data_frame[0:period]
 
     start,end = get_time_periods(period * interval, timespan)
-    return process_api.api.polygon.historic_agg_v2(ticker, interval, timespan, _from=start, to=end, limit=period).df
+    return api.polygon.historic_agg_v2(ticker, interval, timespan, _from=start, to=end, limit=period).df
 
 ### helper function
 def get_time_periods(delta, timespan='minute'):

@@ -2,7 +2,7 @@ import os
 import infrastructure
 from signal import signal, SIGABRT, SIGINT, SIGTERM
 
-
+BACKTRADING = False
 
 def main_process_cleanup(*args):
     for child in infrastructure.child_processes:

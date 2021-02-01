@@ -9,6 +9,7 @@ def main_setup():
     filename = 'history.log'
     if os.path.exists(filename): os.remove(filename)
     logging.basicConfig(format=FORMAT, filename=filename, level=LOG_LEVEL)
+    global queue
     queue = multiprocessing.Queue()
     process_setup(queue)
     return queue
@@ -20,9 +21,10 @@ def process_setup(logging_queue):
     global queue
     queue = logging_queue
 
-async def listen():
+def listen():
     # listen to any logging requests, and populate our log file using a mutex
     while True:
+        global queue
         log = queue.get()
         if log['priority'] == 'debug': logging.debug(log['data'])
         if log['priority'] == 'info': logging.info(log['data'])
@@ -32,8 +34,10 @@ async def listen():
         if log['priority'] == 'TERMINATE': raise Exception("raised by TERMINATE")
 
 def log(data, priority='info'):
+    global queue
     queue.put({'priority': priority, 'data': data})
 def logp(data, priority='info'):
+    global queue
     print(data)
     queue.put({'priority': priority, 'data': data})
 

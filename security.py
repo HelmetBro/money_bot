@@ -1,7 +1,6 @@
 import logger
 import math
 import backtrader_setup
-import process_api
 import backtrader as bt
 from datetime import timedelta
 from func_timeout import func_set_timeout
@@ -120,7 +119,7 @@ class Security:
 	@func_set_timeout(TIMEOUT)
 	def current_price(self):
 		try:
-			market_value = float(process_api.api.get_last_quote(self.ticker).askprice)
+			market_value = float(api.get_last_quote(self.ticker).askprice)
 		except:
 			logger.log("was not able to get last trade price of {}!".format(self.ticker), 'error')
 			raise Exception
@@ -136,7 +135,7 @@ class Security:
 	@func_set_timeout(TIMEOUT)
 	def has_position(self):
 		try:
-			self.position = process_api.api.get_position(self.ticker)
+			self.position = api.get_position(self.ticker)
 			return True
 		except:
 			return False
