@@ -3,10 +3,6 @@ import datetime
 import pytz
 import backtrader_setup
 
-
-
-
-
 def get(ticker, period, interval, timespan):
     # if we're backtrading, we already have set start/end dates. just return what we already computed
     if backtrader_setup.BACKTRADER:

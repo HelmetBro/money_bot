@@ -60,7 +60,7 @@ class transaction:
 			time_in_force=self.time_in_force)
 		logger.logp(self.get_info())
 		return order
-	
+
 	def get_info(self):
 		return "submitted order: {}, qty {}, side {}, type {}, tif {}".format(
 			self.ticker,

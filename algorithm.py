@@ -22,18 +22,27 @@ class algorithm(listener):
 			pass
 		return self.live_minute_data_pd[0:period]
 
+	def get_second_data(self, period):
+		if run.BACKTRADING:
+			pass
+		return self.live_second_data_pd[0:period]
+
 	def on_minute(self):
 		# storing and appending to a list is much faster than a df. concating a df is fast.
 		wait(lambda: super.minute_has_update == True)
-		self.live_minute_data.append(super.minute_data)
-		self.live_minute_data_pd = pandas.concat(self.live_minute_data, ignore_index=True)
+		super.minute_lock.acquire()
+		self.live_minute_data_list.append(super.minute_data)
+		super.minute_lock.release()
+		self.live_minute_data_pd = pandas.concat(self.live_minute_data_list, ignore_index=True)
 		super.minute_has_update = False
-	
+
 	def on_second(self):
 		# storing and appending to a list is much faster than a df. concating a df is fast.
 		wait(lambda: super.second_has_update == True)
-		self.live_second_data.append(super.second_data)
-		self.live_second_data_pd = pandas.concat(self.live_second_data, ignore_index=True)
+		super.second_lock.acquire()
+		self.live_second_data_list.append(super.second_data)
+		super.second_lock.release()
+		self.live_second_data_pd = pandas.concat(self.live_second_data_list, ignore_index=True)
 		super.second_has_update = False
 
 	# can add on_status and on_account in future if needed

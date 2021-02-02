@@ -1,7 +1,11 @@
-from logger import listen
 import threading
 
 class listener:
+	account_lock = threading.Lock()
+	status_lock = threading.Lock()
+	minute_lock = threading.Lock()
+	second_lock = threading.Lock()
+
 	listeners = None
 	account = None # this should only be edited by one sub-thread
 	status = None # this should only be edited by one sub-thread
@@ -25,27 +29,34 @@ class listener:
 		for l in self.listeners:
 			l.start()
 
-	### NEED TO ADD LOCKS TO THIS AND STUFF
 	def account_listener(self, listener):
 		while True:
+			self.account_lock.acquire()
 			self.account = listener.recv()
 			self.account_has_update = True
 			print(self.account)
+			self.account_lock.release()
 
 	def status_listener(self, listener):
 		while True:
+			self.status_lock.acquire()
 			self.status = listener.recv()
 			self.status_has_update = True
 			print(self.status)
+			self.second_lock.release()
 
 	def minute_listener(self, listener):
 		while True:
+			self.minute_lock.acquire()
 			self.minute_data = listener.recv()
 			self.minute_has_update = True
 			print(self.minute_data)
+			self.second_lock.release()
 
 	def second_listener(self, listener):
 		while True:
+			self.second_lock.acquire()
 			self.second_data = listener.recv()
 			self.second_has_update = True
 			print(self.second_data)
+			self.second_lock.release()
