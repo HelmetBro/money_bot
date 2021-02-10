@@ -1,4 +1,5 @@
 import os
+import sys
 import infrastructure
 from signal import signal, SIGABRT, SIGINT, SIGTERM
 
@@ -13,6 +14,8 @@ def main_process_cleanup(*args):
     os.kill(os.getpid(), SIGABRT)
 
 if __name__ == "__main__":
+    if sys.argv[0] == '-b' or sys.argv[0] == "--backtrader":
+        BACKTRADING = True
     try:
         for sig in (SIGINT, SIGTERM):
             signal(sig, main_process_cleanup)

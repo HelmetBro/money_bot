@@ -7,8 +7,8 @@ class listener:
 	second_lock = threading.Lock()
 
 	listeners = None
-	account = None # this should only be edited by one sub-thread
-	status = None # this should only be edited by one sub-thread
+	account_data = None # this should only be edited by one sub-thread
+	status_data = None # this should only be edited by one sub-thread
 	minute_data = None # this should only be edited by one sub-thread
 	second_data = None # this should only be edited by one sub-thread
 
@@ -18,9 +18,9 @@ class listener:
 	second_has_update = False
 
 	def __init__(self, account_updates, status_updates, minute_updates, second_updates):
-		
-		# make requests to get account data when created first before doing the below. WIP
-		
+
+		# make request(s) to get account data when created first before doing the below W.I.P.
+
 		account_listener = threading.Thread(target=self.account_listener(account_updates), daemon=True)
 		status_listener = threading.Thread(target=self.status_listener(status_updates), daemon=True)
 		minute_listener = threading.Thread(target=self.minute_listener(minute_updates), daemon=True)
@@ -32,17 +32,17 @@ class listener:
 	def account_listener(self, listener):
 		while True:
 			self.account_lock.acquire()
-			self.account = listener.recv()
+			self.account_data = listener.recv()
 			self.account_has_update = True
-			print(self.account)
+			print(self.account_data)
 			self.account_lock.release()
 
 	def status_listener(self, listener):
 		while True:
 			self.status_lock.acquire()
-			self.status = listener.recv()
+			self.status_data = listener.recv()
 			self.status_has_update = True
-			print(self.status)
+			print(self.status_data)
 			self.second_lock.release()
 
 	def minute_listener(self, listener):

@@ -26,7 +26,7 @@ tickers = {'GOVX', 'TGC', 'IDEX', 'PLTR', 'CNSP', 'USX', 'GRNQ', 'VISL', 'TRXC'}
 # used only for main process to join() upon termination. do NOT use a process pool
 child_processes = []
 
-# pipe later created by multiprocessing to access 
+# pipe later created by multiprocessing to access
 account_update_streams = []
 status_update_streams  = []
 minute_update_streams  = []
@@ -49,6 +49,8 @@ async def on_minute_bars(conn, channel, bar):
 
 @conn.on(r'^A$')
 async def on_second_bars(conn, channel, bar):
+    print(conn)
+    print(channel)
     for stream in second_update_streams:
         stream.send(bar)
 
@@ -108,7 +110,7 @@ def start_loop():
     logger_thread.start()
 
     # thread to initiate api requests
-    api_thread = threading.Thread(target=transaction.listen, args=(parent_order_pipe), daemon=True)
+    api_thread = threading.Thread(target=transaction.listen, args=(parent_order_pipe,), daemon=True)
     api_thread.start()
 
     for process in child_processes:
@@ -116,7 +118,7 @@ def start_loop():
 
     conn.run(['trade_updates', 'alpacadatav1/AM.SPY']) # later change this to watch all tickers
 
-def work(logging_queue, 
+def work(logging_queue,
          order_pipe,
          account_updates,
          status_updates,

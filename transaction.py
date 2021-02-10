@@ -1,12 +1,10 @@
-from func_timeout import func_set_timeout
-
 import logger
 
 TIMEOUT = 9
 
 # to be run in a thread by the main process
 def listen(pipe):
-	import alpaca_backtrader_api as trader_api
+	import alpaca_trade_api as trader_api
 	api = trader_api.REST()
 
 	while True:
@@ -49,15 +47,23 @@ class transaction:
 		# if self.has_position():
 		# 	logger.log("position already exists with {} shares!".format(self.position.qty), 'debug')
 		# 	return
-	
+
 	# only to be called by main processes sub-thread, listen()
 	def submit(self, api):
-		order = api.submit_order(
-			symbol=self.ticker,
-			side=self.side,
-			type=self.type,
-			qty=self.qty,
-			time_in_force=self.time_in_force)
+
+		# negative qty? liquidate asset.
+		if self.qty < 0:
+			order = api.close_position(self.ticker)
+
+		# otherwise just submit a regular order
+		else:
+			order = api.submit_order(
+				symbol=self.ticker,
+				side=self.side,
+				type=self.type,
+				qty=self.qty,
+				time_in_force=self.time_in_force)
+
 		logger.logp(self.get_info())
 		return order
 
@@ -76,5 +82,11 @@ def market_buy(order_pipe, ticker, qty):
 
 def market_sell(order_pipe, ticker, qty):
 	t = transaction(order_pipe, ticker, 'sell', 'market', qty, 'fok')
+	order_pipe.send(t)
+	return order_pipe.recv()
+
+# liquidates a position at market price
+def market_liquidate(order_pipe, ticker):
+	t = transaction(order_pipe, ticker, 'sell', 'market', -1, 'fok')
 	order_pipe.send(t)
 	return order_pipe.recv()
