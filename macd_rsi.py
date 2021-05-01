@@ -17,8 +17,8 @@ class macd_rsi(algorithm.algorithm):
 	rsi_upper_bound = 66.66
 	rsi_lower_bound = 33.33
 
-	def __init__(self, ticker, order_pipe, account_updates, status_updates, minute_updates, second_updates):
-		super().__init__(order_pipe, account_updates, status_updates, minute_updates, second_updates)
+	def __init__(self, ticker, order_pipe, trade_reader, quote_reader, bar_reader, update_reader):
+		super().__init__(order_pipe, trade_reader, quote_reader, bar_reader, update_reader)
 		self.ticker = ticker
 
 	def run(self):

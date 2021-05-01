@@ -1,0 +1,39 @@
+quote {'T': 'q', 'S': 'AAPL', 'bx': 'V', 'bp': 133.56, 'bs': 4, 'ax': 'V', 'ap': 133.58, 'as': 1, 't': Timestamp(seconds=1619717344, nanoseconds=627787843), 'c': ['R'], 'z': 'C'}
+quote {'T': 'q', 'S': 'AAPL', 'bx': 'V', 'bp': 133.56, 'bs': 5, 'ax': 'V', 'ap': 133.58, 'as': 1, 't': Timestamp(seconds=1619717344, nanoseconds=650423884), 'c': ['R'], 'z': 'C'}
+quote {'T': 'q', 'S': 'AAPL', 'bx': 'V', 'bp': 133.56, 'bs': 5, 'ax': 'V', 'ap': 134.2, 'as': 1, 't': Timestamp(seconds=1619717344, nanoseconds=652114547), 'c': ['R'], 'z': 'C'}
+quote {'T': 'q', 'S': 'AAPL', 'bx': 'V', 'bp': 133.56, 'bs': 5, 'ax': 'V', 'ap': 134.2, 'as': 1, 't': Timestamp(seconds=1619717344, nanoseconds=652122371), 'c': ['R'], 'z': 'C'}
+quote {'T': 'q', 'S': 'AAPL', 'bx': 'V', 'bp': 133.57, 'bs': 3, 'ax': 'V', 'ap': 134.2, 'as': 1, 't': Timestamp(seconds=1619717344, nanoseconds=652441099), 'c': ['R'], 'z': 'C'}
+quote {'T': 'q', 'S': 'AAPL', 'bx': 'V', 'bp': 133.57, 'bs': 4, 'ax': 'V', 'ap': 134.2, 'as': 1, 't': Timestamp(seconds=1619717344, nanoseconds=652471597), 'c': ['R'], 'z': 'C'}
+quote {'T': 'q', 'S': 'MSFT', 'bx': 'V', 'bp': 250.0, 'bs': 1, 'ax': 'V', 'ap': 251.44, 'as': 2, 't': Timestamp(seconds=1619717344, nanoseconds=659163814), 'c': ['R'], 'z': 'C'}
+
+
+
+quote {'T': 'q', 'S': 'TSLA', 'bx': 'V', 'bp': 673.25, 'bs': 1, 'ax': 'V', 'ap': 696.28, 'as': 1, 't': Timestamp(seconds=1619717343, nanoseconds=555812370), 'c': ['R'], 'z': 'C'}
+quote {'T': 'q', 'S': 'MSFT', 'bx': 'V', 'bp': 250.0, 'bs': 1, 'ax': 'V', 'ap': 251.4, 'as': 1, 't': Timestamp(seconds=1619717344, nanoseconds=267471703), 'c': ['R'], 'z': 'C'}
+quote {'T': 'q', 'S': 'MSFT', 'bx': 'V', 'bp': 250.0, 'bs': 1, 'ax': 'V', 'ap': 251.41, 'as': 2, 't': Timestamp(seconds=1619717344, nanoseconds=268791960), 'c': ['R'], 'z': 'C'}
+quote {'T': 'q', 'S': 'AAPL', 'bx': 'V', 'bp': 133.57, 'bs': 3, 'ax': 'V', 'ap': 134.2, 'as': 1, 't': Timestamp(seconds=1619717344, nanoseconds=624947511), 'c': ['R'], 'z': 'C'}
+quote {'T': 'q', 'S': 'AAPL', 'bx': 'V', 'bp': 133.56, 'bs': 3, 'ax': 'V', 'ap': 134.2, 'as': 1, 't': Timestamp(seconds=1619717344, nanoseconds=624983813), 'c': ['R'], 'z': 'C'}
+quote {'T': 'q', 'S': 'TSLA', 'bx': 'V', 'bp': 668.0, 'bs': 1, 'ax': 'V', 'ap': 696.28, 'as': 1, 't': Timestamp(seconds=1619717344, nanoseconds=625824404), 'c': ['R'], 'z': 'C'}
+
+
+
+trade {'T': 't', 'i': 9264, 'S': 'MSFT', 'x': 'V', 'p': 251.33, 's': 1, 't': Timestamp(seconds=1619717413, nanoseconds=914339602), 'c': ['@', 'I'], 'z': 'C'}
+trade {'T': 't', 'i': 9265, 'S': 'MSFT', 'x': 'V', 'p': 251.315, 's': 1, 't': Timestamp(seconds=1619717415, nanoseconds=914821813), 'c': ['@', 'I'], 'z': 'C'}
+trade {'T': 't', 'i': 9266, 'S': 'MSFT', 'x': 'V', 'p': 251.3, 's': 17, 't': Timestamp(seconds=1619717417, nanoseconds=346975696), 'c': ['@', 'I'], 'z': 'C'}
+trade {'T': 't', 'i': 9267, 'S': 'MSFT', 'x': 'V', 'p': 251.3, 's': 19, 't': Timestamp(seconds=1619717417, nanoseconds=432226965), 'c': ['@', 'I'], 'z': 'C'}
+trade {'T': 't', 'i': 17287, 'S': 'AAPL', 'x': 'V', 'p': 133.45, 's': 100, 't': Timestamp(seconds=1619717417, nanoseconds=643864296), 'c': ['@'], 'z': 'C'}
+trade {'T': 't', 'i': 17288, 'S': 'AAPL', 'x': 'V', 'p': 133.45, 's': 50, 't': Timestamp(seconds=1619717417, nanoseconds=643864296), 'c': ['@', 'I'], 'z': 'C'}
+trade {'T': 't', 'i': 9268, 'S': 'MSFT', 'x': 'V', 'p': 251.315, 's': 2, 't': Timestamp(seconds=1619717417, nanoseconds=913937000), 'c': ['@', 'I'], 'z': 'C'}
+trade {'T': 't', 'i': 12032, 'S': 'TSLA', 'x': 'V', 'p': 673.14, 's': 1, 't': Timestamp(seconds=1619717418, nanoseconds=21349094), 'c': ['@', 'I'], 'z': 'C'}
+trade {'T': 't', 'i': 9269, 'S': 'MSFT', 'x': 'V', 'p': 251.31, 's': 1, 't': Timestamp(seconds=1619717420, nanoseconds=914391872), 'c': ['@', 'I'], 'z': 'C'}
+
+
+
+bars {'T': 'b', 'S': 'TSLA', 'o': 672.94, 'h': 672.94, 'l': 672.61, 'c': 672.81, 'v': 729, 't': Timestamp(seconds=1619717580, nanoseconds=0)}
+bars {'T': 'b', 'S': 'AAPL', 'o': 133.49, 'h': 133.5, 'l': 133.325, 'c': 133.33, 'v': 3436, 't': Timestamp(seconds=1619717580, nanoseconds=0)}
+bars {'T': 'b', 'S': 'TSLA', 'o': 672.85, 'h': 673.83, 'l': 672.85, 'c': 673.69, 'v': 6728, 't': Timestamp(seconds=1619717640, nanoseconds=0)}
+bars {'T': 'b', 'S': 'MSFT', 'o': 251.2, 'h': 251.25, 'l': 251.185, 'c': 251.245, 'v': 2752, 't': Timestamp(seconds=1619717640, nanoseconds=0)}
+bars {'T': 'b', 'S': 'AAPL', 'o': 133.31, 'h': 133.4, 'l': 133.31, 'c': 133.38, 'v': 2441, 't': Timestamp(seconds=1619717640, nanoseconds=0)}
+bars {'T': 'b', 'S': 'TSLA', 'o': 673.78, 'h': 674.245, 'l': 673.78, 'c': 674.245, 'v': 1795, 't': Timestamp(seconds=1619717700, nanoseconds=0)}
+bars {'T': 'b', 'S': 'MSFT', 'o': 251.265, 'h': 251.335, 'l': 251.25, 'c': 251.25, 'v': 2236, 't': Timestamp(seconds=1619717700, nanoseconds=0)}
+bars {'T': 'b', 'S': 'AAPL', 'o': 133.37, 'h': 133.39, 'l': 133.37, 'c': 133.38, 'v': 895, 't': Timestamp(seconds=1619717700, nanoseconds=0)}

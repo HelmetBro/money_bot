@@ -17,8 +17,8 @@ if __name__ == "__main__":
     if sys.argv[0] == '-b' or sys.argv[0] == "--backtrader":
         BACKTRADING = True
     try:
-        for sig in (SIGINT, SIGTERM):
-            signal(sig, main_process_cleanup)
+        # for sig in (SIGINT, SIGTERM):
+        #     signal(sig, main_process_cleanup)
         infrastructure.main()
     except Exception as e:
         main_process_cleanup()
