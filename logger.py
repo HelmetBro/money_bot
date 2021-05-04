@@ -36,6 +36,7 @@ def listen():
 def log(data, priority='info'):
     global queue
     queue.put({'priority': priority, 'data': data})
+
 def logp(data, priority='info'):
     global queue
     print(data)

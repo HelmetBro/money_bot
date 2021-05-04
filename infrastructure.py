@@ -1,10 +1,12 @@
 from macd_rsi import macd_rsi
-from run import BACKTRADING
 import os
+from run import BACKTRADING as BACKTRADING
 import multiprocessing
 import threading
 import traceback
 import transaction
+import time
+import asyncio
 
 # errors, signals, logging, etc
 import logger
@@ -24,7 +26,8 @@ stream = Stream(data_feed=FEED, raw_data=True)
 
 # tickers = ['BBBY', 'GME', 'NOK', 'AMC', 'SNDL', 'NAKD', 'CTRM', 'TRCH', 'IDEX', 'CCIV']
 # tickers = ['GOVX', 'TGC', 'IDEX', 'PLTR', 'CNSP', 'USX', 'GRNQ', 'VISL', 'TRXC']
-tickers = ['TSLA', 'AAPL', 'MSFT']
+# tickers = ['TSLA', 'AAPL', 'MSFT']
+tickers = ['TSLA']
 
 # used only for main process to join() upon termination. do NOT use a process pool
 child_processes = []
@@ -35,45 +38,59 @@ quote_stream   = []
 bars_stream    = []
 updates_stream = []
 
+
+
+
+### testing
+t1 = {'T': 't', 'i': 9264, 'S': 'MSFT', 'x': 'V', 'p': 251.33, 's': 1, 'c': ['@', 'I'], 'z': 'C'}
+t2 = {'T': 't', 'i': 9265, 'S': 'MSFT', 'x': 'V', 'p': 251.315, 's': 1, 'c': ['@', 'I'], 'z': 'C'}
+t3 = {'T': 't', 'i': 9266, 'S': 'MSFT', 'x': 'V', 'p': 251.3, 's': 17, 'c': ['@', 'I'], 'z': 'C'}
+t4 = {'T': 't', 'i': 9267, 'S': 'MSFT', 'x': 'V', 'p': 251.3, 's': 19, 'c': ['@', 'I'], 'z': 'C'}
+t5 = {'T': 't', 'i': 17287, 'S': 'AAPL', 'x': 'V', 'p': 133.45, 's': 100, 'c': ['@'], 'z': 'C'}
+t6 = {'T': 't', 'i': 17288, 'S': 'AAPL', 'x': 'V', 'p': 133.45, 's': 50, 'c': ['@', 'I'], 'z': 'C'}
+t7 = {'T': 't', 'i': 9268, 'S': 'MSFT', 'x': 'V', 'p': 251.315, 's': 2, 'c': ['@', 'I'], 'z': 'C'}
+t8 = {'T': 't', 'i': 12032, 'S': 'TSLA', 'x': 'V', 'p': 673.14, 's': 1, 'c': ['@', 'I'], 'z': 'C'}
+t9 = {'T': 't', 'i': 9269, 'S': 'MSFT', 'x': 'V', 'p': 251.31, 's': 1, 'c': ['@', 'I'], 'z': 'C'}
+
+q1 = {'T': 'q', 'S': 'AAPL', 'bx': 'V', 'bp': 133.56, 'bs': 4, 'ax': 'V', 'ap': 133.58, 'as': 1, 'c': ['R'], 'z': 'C'}
+q2 = {'T': 'q', 'S': 'AAPL', 'bx': 'V', 'bp': 133.57, 'bs': 4, 'ax': 'V', 'ap': 134.2, 'as': 1, 'c': ['R'], 'z': 'C'}
+q3 = {'T': 'q', 'S': 'MSFT', 'bx': 'V', 'bp': 250.0, 'bs': 1, 'ax': 'V', 'ap': 251.44, 'as': 2, 'c': ['R'], 'z': 'C'}
+q4 = {'T': 'q', 'S': 'TSLA', 'bx': 'V', 'bp': 673.25, 'bs': 1, 'ax': 'V', 'ap': 696.28, 'as': 1, 'c': ['R'], 'z': 'C'}
+q5 = {'T': 'q', 'S': 'MSFT', 'bx': 'V', 'bp': 250.0, 'bs': 1, 'ax': 'V', 'ap': 251.4, 'as': 1, 'c': ['R'], 'z': 'C'}
+q6 = {'T': 'q', 'S': 'MSFT', 'bx': 'V', 'bp': 250.0, 'bs': 1, 'ax': 'V', 'ap': 251.41, 'as': 2, 'c': ['R'], 'z': 'C'}
+q7 = {'T': 'q', 'S': 'AAPL', 'bx': 'V', 'bp': 133.57, 'bs': 3, 'ax': 'V', 'ap': 134.2, 'as': 1, 'c': ['R'], 'z': 'C'}
+q8 = {'T': 'q', 'S': 'AAPL', 'bx': 'V', 'bp': 133.56, 'bs': 3, 'ax': 'V', 'ap': 134.2, 'as': 1, 'c': ['R'], 'z': 'C'}
+q9 = {'T': 'q', 'S': 'TSLA', 'bx': 'V', 'bp': 668.0, 'bs': 1, 'ax': 'V', 'ap': 696.28, 'as': 1, 'c': ['R'], 'z': 'C'}
+
+b1 = {'T': 'b', 'S': 'TSLA', 'o': 672.94, 'h': 672.94, 'l': 672.61, 'c': 672.81, 'v': 729}
+b2 = {'T': 'b', 'S': 'AAPL', 'o': 133.49, 'h': 133.5, 'l': 133.325, 'c': 133.33, 'v': 3436}
+b3 = {'T': 'b', 'S': 'TSLA', 'o': 672.85, 'h': 673.83, 'l': 672.85, 'c': 673.69, 'v': 6728}
+b4 = {'T': 'b', 'S': 'MSFT', 'o': 251.2, 'h': 251.25, 'l': 251.185, 'c': 251.245, 'v': 2752}
+b5 = {'T': 'b', 'S': 'AAPL', 'o': 133.31, 'h': 133.4, 'l': 133.31, 'c': 133.38, 'v': 2441}
+b6 = {'T': 'b', 'S': 'TSLA', 'o': 673.78, 'h': 674.245, 'l': 673.78, 'c': 674.245, 'v': 1795}
+b7 = {'T': 'b', 'S': 'MSFT', 'o': 251.265, 'h': 251.335, 'l': 251.25, 'c': 251.25, 'v': 2236}
+b8 = {'T': 'b', 'S': 'AAPL', 'o': 133.37, 'h': 133.39, 'l': 133.37, 'c': 133.38, 'v': 895}
+b9 = {'T': 'b', 'S': 'MSFT', 'o': 251.3, 'h': 251.43, 'l': 251.26, 'c': 251.255, 'v': 2036}
+
 async def trade_callback(t):
-    return
-    print('trade', t)
+    for stream in trade_stream:
+        if stream['ticker'] == t['S']:
+            stream['writer'].send(t)
 
 async def quote_callback(q):
-    return
-    print('quote', q)
+    for stream in quote_stream:
+        if stream['ticker'] == q['S']:
+            stream['writer'].send(q)
 
 async def bars_callback(b):
-    print('bars', b)
+    for stream in bars_stream:
+        if stream['ticker'] == b['S']:
+            stream['writer'].send(b)
 
-async def trade_updates_callback(tu):
-    print('updates', tu)
-
-
-# @conn.on(r'^trade_updates$')
-# async def on_account_updates(conn, channel, account):
-#     logger.logp("trade")
-#     for stream in account_update_streams:
-#         if stream['ticker'] == channel:
-#             stream['writer'].send(account)
-
-# @conn.on(r'^status$')
-# async def on_status(conn, channel, data):
-#     logger.logp("status")
-#     for stream in status_update_streams:
-#         stream.send(data)
-
-# @conn.on(r'^AM$')
-# async def on_minute_bars(conn, channel, bar):
-#     logger.logp("minute")
-#     for stream in minute_update_streams:
-#         stream.send(bar)
-
-# @conn.on(r'^A$')
-# async def on_second_bars(conn, channel, bar):
-#     logger.logp("second")
-#     for stream in second_update_streams:
-#         stream.send(bar)
+async def updates_callback(u):
+    for stream in updates_stream:
+        if stream['ticker'] == u['S']:
+            stream['writer'].send(u)
 
 def main():
     # check all tickers to ensure they're supported by Alpaca
@@ -111,8 +128,8 @@ def start_loop():
         global updates_stream
         trade_reader, trade_writer     = multiprocessing.Pipe()
         quote_reader, quote_writer     = multiprocessing.Pipe()
-        bar_reader, bar_writer       = multiprocessing.Pipe()
-        update_reader, update_writer = multiprocessing.Pipe()
+        bar_reader, bar_writer         = multiprocessing.Pipe()
+        update_reader, update_writer   = multiprocessing.Pipe()
         trade_stream.append(  {'ticker': ticker, 'writer': trade_writer})
         quote_stream.append(  {'ticker': ticker, 'writer': quote_writer})
         bars_stream.append(   {'ticker': ticker, 'writer': bar_writer})
@@ -133,7 +150,7 @@ def start_loop():
         stream.subscribe_trades(trade_callback, ticker)
         stream.subscribe_quotes(quote_callback, ticker)
         stream.subscribe_bars(bars_callback, ticker)
-        stream.subscribe_trade_updates(trade_updates_callback)
+        stream.subscribe_trade_updates(updates_callback)
 
     # thread to initiate logging to run in a background thread on main process
     logger_thread = threading.Thread(target=logger.listen, daemon=True)
@@ -143,11 +160,15 @@ def start_loop():
     api_thread = threading.Thread(target=transaction.listen, args=(parent_order_pipe,), daemon=True)
     api_thread.start()
 
-    # for process in child_processes:
-    #     process.start()
+    for process in child_processes:
+        process.start()
 
-    if not BACKTRADING:
-        stream.run()
+    while BACKTRADING:
+        time.sleep(1)
+        print("sending data")
+        asyncio.run(bars_callback(b1))
+
+    stream.run() # this is blocking
 
 def work(logging_queue,
          order_pipe,
@@ -169,7 +190,6 @@ def work(logging_queue,
                          quote_reader,
                          bar_reader,
                          update_reader)
-
     try:
         algorithm.run()
     except FunctionTimedOut as e:

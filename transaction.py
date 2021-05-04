@@ -6,7 +6,6 @@ TIMEOUT = 9
 def listen(pipe):
 	import alpaca_trade_api as trader_api
 	api = trader_api.REST()
-
 	while True:
 		# listen to pipe, and submit requests accordingly
 		transaction = pipe.recv()
@@ -110,7 +109,7 @@ def market_buy(order_pipe, ticker, notional):
 		value            = notional,
 		time_in_force    = 'fok')
 	order_pipe.send(t)
-	return order_pipe.recv()
+	return order_pipe.recv() # probably modify this code, and add locks. look at transaction.listen
 
 # def market_buy(order_pipe, ticker, qty):
 # 	t = transaction(order_pipe, ticker, 'buy', 'market', qty, 'fok')

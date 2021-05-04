@@ -1,9 +1,15 @@
 import os
-import sys
+import argparse
 import infrastructure
 from signal import signal, SIGABRT, SIGINT, SIGTERM
 
-BACKTRADING = False
+# parsing arguments and setting global BACKTRADING var
+# Must be accessed by from run import BACKTRADING as BACKTRADING
+parser = argparse.ArgumentParser()
+parser.add_argument("-b", "--backtrader",
+                    help="runs algorithm with backtrading data",
+                    action="store_true")
+BACKTRADING = parser.parse_args().backtrader
 
 def main_process_cleanup(*args):
     for child in infrastructure.child_processes:
@@ -14,8 +20,6 @@ def main_process_cleanup(*args):
     os.kill(os.getpid(), SIGABRT)
 
 if __name__ == "__main__":
-    if sys.argv[0] == '-b' or sys.argv[0] == "--backtrader":
-        BACKTRADING = True
     try:
         # for sig in (SIGINT, SIGTERM):
         #     signal(sig, main_process_cleanup)
