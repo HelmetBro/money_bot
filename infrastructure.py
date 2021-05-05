@@ -7,6 +7,7 @@ import traceback
 import transaction
 import time
 import asyncio
+import pandas
 
 # errors, signals, logging, etc
 import logger
@@ -38,9 +39,6 @@ quote_stream   = []
 bars_stream    = []
 updates_stream = []
 
-
-
-
 ### testing
 t1 = {'T': 't', 'i': 9264, 'S': 'MSFT', 'x': 'V', 'p': 251.33, 's': 1, 'c': ['@', 'I'], 'z': 'C'}
 t2 = {'T': 't', 'i': 9265, 'S': 'MSFT', 'x': 'V', 'p': 251.315, 's': 1, 'c': ['@', 'I'], 'z': 'C'}
@@ -70,24 +68,27 @@ b5 = {'T': 'b', 'S': 'AAPL', 'o': 133.31, 'h': 133.4, 'l': 133.31, 'c': 133.38, 
 b6 = {'T': 'b', 'S': 'TSLA', 'o': 673.78, 'h': 674.245, 'l': 673.78, 'c': 674.245, 'v': 1795}
 b7 = {'T': 'b', 'S': 'MSFT', 'o': 251.265, 'h': 251.335, 'l': 251.25, 'c': 251.25, 'v': 2236}
 b8 = {'T': 'b', 'S': 'AAPL', 'o': 133.37, 'h': 133.39, 'l': 133.37, 'c': 133.38, 'v': 895}
-b9 = {'T': 'b', 'S': 'MSFT', 'o': 251.3, 'h': 251.43, 'l': 251.26, 'c': 251.255, 'v': 2036}
 
 async def trade_callback(t):
+    del t['T']
     for stream in trade_stream:
         if stream['ticker'] == t['S']:
             stream['writer'].send(t)
 
 async def quote_callback(q):
+    del q['T']
     for stream in quote_stream:
         if stream['ticker'] == q['S']:
             stream['writer'].send(q)
 
 async def bars_callback(b):
+    del b['T']
     for stream in bars_stream:
-        if stream['ticker'] == b['S']:
+        if stream['ticker'] == b.pop('S', None):
             stream['writer'].send(b)
 
 async def updates_callback(u):
+    del u['T']
     for stream in updates_stream:
         if stream['ticker'] == u['S']:
             stream['writer'].send(u)
@@ -165,8 +166,9 @@ def start_loop():
 
     while BACKTRADING:
         time.sleep(1)
-        print("sending data")
-        asyncio.run(bars_callback(b1))
+        import copy
+        print('sending!')
+        asyncio.run(bars_callback(copy.deepcopy(b1)))
 
     stream.run() # this is blocking
 

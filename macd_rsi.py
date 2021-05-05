@@ -22,27 +22,22 @@ class macd_rsi(algorithm.algorithm):
 		self.ticker = ticker
 
 	def run(self):
-		logger.logp("running!")
 		while True:
 			# calling this only logs bars data
 			super().on_bars()
 
 			# only continue if we have sufficient data (longest data period)
-			while len(super().get_bars(self.long_period_macd)) < self.long_period_macd:
-				print("continue")
+			if len(super().get_bars(self.long_period_macd)) < self.long_period_macd:
 				continue
 
-			print("running!")
-
-
 			# getting our data
-			long_data_macd = super.get_bars(self.long_period_macd)
-			short_data_macd = super.get_bars(self.short_period_macd)
-			rsi_data = super.get_bars(self.period_rsi)
+			long_data_macd = super().get_bars(self.long_period_macd)
+			short_data_macd = super().get_bars(self.short_period_macd)
+			rsi_data = super().get_bars(self.period_rsi)
 
 			# run both strats
 			macd_signal_result = algo_math.macd_with_signal(long_data_macd, short_data_macd, self.signal_ema_period)['c']
-			rsi_result = algo_math.rsi(rsi_data)['c']
+			rsi_result = algo_math.rsi(rsi_data['c'])
 
 			self.buy_or_sell_macd_rsi(macd_signal_result, rsi_result)
 
@@ -56,5 +51,5 @@ class macd_rsi(algorithm.algorithm):
 			transaction.market_liquidate(super.order_pipe, self.ticker)
 
 		# if undesireable, don't make a transaction
-		logger.log("{} -> macd_signal: {}, rsi: {} no trade signal thrown".format(
+		logger.logp("{} -> macd_signal: {}, rsi: {} no trade signal thrown".format(
 			self.ticker, macd_signal_result, rsi_result), 'debug')
