@@ -26,28 +26,18 @@ class algorithm(listener.listener):
 		self.order_pipe = order_pipe
 
 	def get_account(self):
-		if run.BACKTRADING:
-			pass
 		return self.account
 
 	def get_trades(self, period):
-		if run.BACKTRADING:
-			pass
 		return self.live_trades_data_pd[0:period]
 
 	def get_quotes(self, period):
-		if run.BACKTRADING:
-			pass
 		return self.live_quotes_data_pd[0:period]
 
 	def get_bars(self, period):
-		if run.BACKTRADING:
-			pass
 		return self.live_bars_data_pd[0:period]
 
 	def get_updates(self, period):
-		if run.BACKTRADING:
-			pass
 		return self.live_updates_data_pd[0:period]
 
 	### The following must remain separate functions due to GIL
@@ -68,7 +58,7 @@ class algorithm(listener.listener):
 		# storing and appending to a list is much faster than a df. concating a df is fast.
 		wait(lambda: self.quotes_has_update == True)
 		super.quotes_lock.acquire()
-		self.live_quotes_data_pd = pandas.append(self.quotes_data)
+		self.live_quotes_data_pd.loc[len(self.live_quotes_data_pd)] = self.quotes_data
 
 		if len(self.live_quotes_data_pd) >= self.MAX_DATA_SIZE:
 			self.live_quotes_data_pd = self.live_quotes_data_pd[:-int(self.MAX_DATA_SIZE/2) or None]
@@ -92,7 +82,7 @@ class algorithm(listener.listener):
 		# storing and appending to a list is much faster than a df. concating a df is fast.
 		wait(lambda: self.updates_has_update == True)
 		self.updates_lock.acquire()
-		self.live_updates_data_pd = pandas.append(self.updates_data)
+		self.live_updates_data_pd.loc[len(self.live_updates_data_pd)] = self.updates_data
 
 		if len(self.live_updates_data_pd) >= self.MAX_DATA_SIZE:
 			self.live_updates_data_pd = self.live_updates_data_pd[:-int(self.MAX_DATA_SIZE/2) or None]

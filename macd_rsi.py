@@ -5,6 +5,10 @@ import logger
 import transaction
 import algo_math
 
+import time
+def current_milli_time():
+	return round(time.time() * 1000)
+
 class macd_rsi(algorithm.algorithm):
 	buying_power = 0
 	ticker = None
@@ -44,12 +48,13 @@ class macd_rsi(algorithm.algorithm):
 	def buy_or_sell_macd_rsi(self, macd_signal_result, rsi_result):
 		# buy as much as possible
 		if macd_signal_result > 0 and rsi_result < self.rsi_lower_bound:
-			transaction.market_buy(super.order_pipe, self.ticker, self.buy_power)
+			transaction.market_buy(super.order_pipe, self.ticker, self.buying_power)
 
 		# liquidate entire position
 		elif macd_signal_result < 0 and rsi_result > self.rsi_upper_bound:
 			transaction.market_liquidate(super.order_pipe, self.ticker)
 
 		# if undesireable, don't make a transaction
-		logger.logp("{} -> macd_signal: {}, rsi: {} no trade signal thrown".format(
+		else:
+			logger.logp("{} -> macd_signal: {}, rsi: {} no trade signal thrown".format(
 			self.ticker, macd_signal_result, rsi_result), 'debug')

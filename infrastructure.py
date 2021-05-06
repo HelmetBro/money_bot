@@ -7,7 +7,8 @@ import traceback
 import transaction
 import time
 import asyncio
-import pandas
+import copy
+
 
 # errors, signals, logging, etc
 import logger
@@ -69,28 +70,69 @@ b6 = {'T': 'b', 'S': 'TSLA', 'o': 673.78, 'h': 674.245, 'l': 673.78, 'c': 674.24
 b7 = {'T': 'b', 'S': 'MSFT', 'o': 251.265, 'h': 251.335, 'l': 251.25, 'c': 251.25, 'v': 2236}
 b8 = {'T': 'b', 'S': 'AAPL', 'o': 133.37, 'h': 133.39, 'l': 133.37, 'c': 133.38, 'v': 895}
 
+tsla_bars = [
+
+    {'T': 'b', 'S': 'TSLA', 'o': 5, 'h': 672.94, 'l': 672.61, 'c': 5.23, 'v': 729},
+    {'T': 'b', 'S': 'TSLA', 'o': 5, 'h': 672.94, 'l': 672.61, 'c': 7.51, 'v': 729},
+    {'T': 'b', 'S': 'TSLA', 'o': 5, 'h': 672.94, 'l': 672.61, 'c': 5.85, 'v': 729},
+    {'T': 'b', 'S': 'TSLA', 'o': 5, 'h': 672.94, 'l': 672.61, 'c': 3.91, 'v': 729},
+    {'T': 'b', 'S': 'TSLA', 'o': 5, 'h': 672.94, 'l': 672.61, 'c': 5.96, 'v': 729},
+    {'T': 'b', 'S': 'TSLA', 'o': 5, 'h': 672.94, 'l': 672.61, 'c': 9.75, 'v': 729},
+    {'T': 'b', 'S': 'TSLA', 'o': 5, 'h': 672.94, 'l': 672.61, 'c': 5.95, 'v': 729},
+    {'T': 'b', 'S': 'TSLA', 'o': 5, 'h': 672.94, 'l': 672.61, 'c': 1.19, 'v': 729},
+    {'T': 'b', 'S': 'TSLA', 'o': 5, 'h': 672.94, 'l': 672.61, 'c': 4.10, 'v': 729},
+    {'T': 'b', 'S': 'TSLA', 'o': 5, 'h': 672.94, 'l': 672.61, 'c': 5.32, 'v': 729},
+    {'T': 'b', 'S': 'TSLA', 'o': 5, 'h': 672.94, 'l': 672.61, 'c': 6.63, 'v': 729},
+    {'T': 'b', 'S': 'TSLA', 'o': 5, 'h': 672.94, 'l': 672.61, 'c': 5.85, 'v': 729},
+    {'T': 'b', 'S': 'TSLA', 'o': 5, 'h': 672.94, 'l': 672.61, 'c': 4.94, 'v': 729},
+    {'T': 'b', 'S': 'TSLA', 'o': 5, 'h': 672.94, 'l': 672.61, 'c': 2.94, 'v': 729},
+    {'T': 'b', 'S': 'TSLA', 'o': 5, 'h': 672.94, 'l': 672.61, 'c': 4.01, 'v': 729},
+    {'T': 'b', 'S': 'TSLA', 'o': 5, 'h': 672.94, 'l': 672.61, 'c': 6.94, 'v': 729},
+    {'T': 'b', 'S': 'TSLA', 'o': 4, 'h': 672.94, 'l': 672.61, 'c': 9.18, 'v': 729},
+    {'T': 'b', 'S': 'TSLA', 'o': 4, 'h': 672.94, 'l': 672.61, 'c': 6.56, 'v': 729},
+    {'T': 'b', 'S': 'TSLA', 'o': 4, 'h': 672.94, 'l': 672.61, 'c': 1.23, 'v': 729},
+    {'T': 'b', 'S': 'TSLA', 'o': 4, 'h': 672.94, 'l': 672.61, 'c': 4.42, 'v': 729},
+    {'T': 'b', 'S': 'TSLA', 'o': 3, 'h': 672.94, 'l': 672.61, 'c': 3.45, 'v': 729},
+    {'T': 'b', 'S': 'TSLA', 'o': 3, 'h': 672.94, 'l': 672.61, 'c': 10.95, 'v': 729},
+    {'T': 'b', 'S': 'TSLA', 'o': 3, 'h': 672.94, 'l': 672.61, 'c': 30.11, 'v': 729},
+    {'T': 'b', 'S': 'TSLA', 'o': 30, 'h': 672.94, 'l': 672.61, 'c': 70.54, 'v': 729},
+    {'T': 'b', 'S': 'TSLA', 'o': 70, 'h': 672.94, 'l': 672.61, 'c': 60.23, 'v': 729},
+    {'T': 'b', 'S': 'TSLA', 'o': 70, 'h': 672.94, 'l': 672.61, 'c': 70.77, 'v': 729},
+    {'T': 'b', 'S': 'TSLA', 'o': 70, 'h': 672.94, 'l': 672.61, 'c': 80.01, 'v': 729},
+    {'T': 'b', 'S': 'TSLA', 'o': 80, 'h': 672.94, 'l': 672.61, 'c': 90.74, 'v': 729},
+    {'T': 'b', 'S': 'TSLA', 'o': 90, 'h': 672.94, 'l': 672.61, 'c': 100.47, 'v': 729},
+    {'T': 'b', 'S': 'TSLA', 'o': 100, 'h': 672.94, 'l': 672.61, 'c': 500.11, 'v': 729},
+]
+
 async def trade_callback(t):
     del t['T']
+    ticker = t.pop('S', None)
     for stream in trade_stream:
-        if stream['ticker'] == t['S']:
+        if stream['ticker'] == ticker:
             stream['writer'].send(t)
 
 async def quote_callback(q):
     del q['T']
+    ticker = q.pop('S', None)
     for stream in quote_stream:
-        if stream['ticker'] == q['S']:
+        if stream['ticker'] == ticker:
             stream['writer'].send(q)
 
 async def bars_callback(b):
     del b['T']
+    ticker = b.pop('S', None)
+    print(b['t'])
+    print(b['t'].seconds)
+    print(b['t'].nanoseconds)
     for stream in bars_stream:
-        if stream['ticker'] == b.pop('S', None):
+        if stream['ticker'] == ticker:
             stream['writer'].send(b)
 
 async def updates_callback(u):
     del u['T']
+    ticker = u.pop('S', None)
     for stream in updates_stream:
-        if stream['ticker'] == u['S']:
+        if stream['ticker'] == ticker:
             stream['writer'].send(u)
 
 def main():
@@ -110,8 +152,11 @@ def main():
     account_status = "account status: {}".format(account.status)
     print(account_status)
 
-    # starting our main process
-    start_loop()
+    try:
+        # starting our main process
+        start_loop()
+    except Exception as e:
+        print(e)
 
 def start_loop():
     logging_queue = logger.main_setup()
@@ -124,7 +169,7 @@ def start_loop():
         # setting up our streams
 
         global trade_stream
-        global quote_stream   # WIP ON THIS. THIS IS INCORRECT!!
+        global quote_stream   # WIP ON THIS. THIS IS INCORRECT!
         global bars_stream
         global updates_stream
         trade_reader, trade_writer     = multiprocessing.Pipe()
@@ -144,7 +189,7 @@ def start_loop():
             quote_reader,
             bar_reader,
             update_reader,
-            ticker))
+            ticker,))
         child_processes.append(process)
 
         #subscribing to each ticker
@@ -164,11 +209,16 @@ def start_loop():
     for process in child_processes:
         process.start()
 
-    while BACKTRADING:
-        time.sleep(1)
-        import copy
-        print('sending!')
-        asyncio.run(bars_callback(copy.deepcopy(b1)))
+    # while BACKTRADING:
+    if BACKTRADING:
+        old_loop = asyncio.get_event_loop()
+        new_loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(new_loop)
+        while True:
+            for x in range(30):
+                time.sleep(0.5)
+                asyncio.run(bars_callback(copy.deepcopy(tsla_bars[x])))
+        asyncio.set_event_loop(old_loop)
 
     stream.run() # this is blocking
 

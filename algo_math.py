@@ -1,4 +1,3 @@
-import backend_data
 import logger
 from func_timeout import func_set_timeout
 
@@ -21,16 +20,16 @@ from func_timeout import func_set_timeout
 #     logger.log("{} -> macd_signal: {}, rsi: {} so no trade signal thrown".format(
 #         security.ticker, macd_signal_result, rsi_result), 'debug')
 
-def std_from_ewm(ticker, period, interval=1, timespan='minute'):
-    # getting our data and calculating our bounds from it
-    history_df = backend_data.get(ticker, period, interval, timespan)
-    if len(history_df.index) < period:
-        raise Exception("insufficient data [std upper/lower]")
+# def std_from_ewm(ticker, period, interval=1, timespan='minute'):
+#     # getting our data and calculating our bounds from it
+#     history_df = backend_data.get(ticker, period, interval, timespan)
+#     if len(history_df.index) < period:
+#         raise Exception("insufficient data [std upper/lower]")
 
-    # ewm = history_df['close'].ewm(period).mean().iloc[-1]
-    # upper = ewm + history_df['close'].std() * 2
-    # lower = ewm - history_df['close'].std()
-    return history_df['c'].std()
+#     # ewm = history_df['close'].ewm(period).mean().iloc[-1]
+#     # upper = ewm + history_df['close'].std() * 2
+#     # lower = ewm - history_df['close'].std()
+#     return history_df['c'].std()
 
 def macd_with_signal(long_data, short_data, ema_period):
     # calculate long-term EWM
@@ -43,12 +42,12 @@ def macd_with_signal(long_data, short_data, ema_period):
     macd = short_ema - long_ema
 
     # this calculates our signal line
-    ema = macd.ewm(span=ema_period, adjust=False).mean()
+    signal = macd.ewm(span=ema_period, adjust=False).mean()
 
-    return ema - macd
+    return macd - signal
 
 def rsi(data):
-    rsi_period = len(data.index)
+    rsi_period = len(data.index) - 1
     # grab our ticker prices and grab only the deltas
     delta = data.diff()
     up,down = delta.copy(),delta.copy()

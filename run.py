@@ -12,6 +12,7 @@ parser.add_argument("-b", "--backtrader",
 BACKTRADING = parser.parse_args().backtrader
 
 def main_process_cleanup(*args):
+    print()
     for child in infrastructure.child_processes:
         print("terminating child process " + str(child.pid))
         os.kill(child.pid, SIGABRT)
@@ -21,8 +22,8 @@ def main_process_cleanup(*args):
 
 if __name__ == "__main__":
     try:
-        # for sig in (SIGINT, SIGTERM):
-        #     signal(sig, main_process_cleanup)
+        for sig in (SIGINT, SIGTERM):
+            signal(sig, main_process_cleanup)
         infrastructure.main()
     except Exception as e:
         main_process_cleanup()
