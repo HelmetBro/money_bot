@@ -8,7 +8,7 @@ import transaction
 import time
 import asyncio
 import copy
-
+import account_setup
 
 # errors, signals, logging, etc
 import logger
@@ -121,9 +121,6 @@ async def quote_callback(q):
 async def bars_callback(b):
     del b['T']
     ticker = b.pop('S', None)
-    print(b['t'])
-    print(b['t'].seconds)
-    print(b['t'].nanoseconds)
     for stream in bars_stream:
         if stream['ticker'] == ticker:
             stream['writer'].send(b)
@@ -149,16 +146,15 @@ def main():
 
     # ensuring our account setup is okay
     account = api.get_account()
-    account_status = "account status: {}".format(account.status)
-    print(account_status)
+    print ("account status: ", account.status)
 
-    try:
-        # starting our main process
-        start_loop()
-    except Exception as e:
-        print(e)
+    # add current tickers to our tickers list, and get current invested positions
+    positions = account_setup.add_current_tickers(api, tickers)
 
-def start_loop():
+    # starting our main process
+    start_loop(positions, account.cash)
+
+def start_loop(positions, cash):
     logging_queue = logger.main_setup()
     logger.logp("starting main loop")
 
@@ -166,10 +162,10 @@ def start_loop():
 
     # populate processes list with an instance per ticker
     for ticker in tickers:
-        # setting up our streams
 
+        # setting up our streams
         global trade_stream
-        global quote_stream   # WIP ON THIS. THIS IS INCORRECT!
+        global quote_stream
         global bars_stream
         global updates_stream
         trade_reader, trade_writer     = multiprocessing.Pipe()
@@ -181,15 +177,20 @@ def start_loop():
         bars_stream.append(   {'ticker': ticker, 'writer': bar_writer})
         updates_stream.append({'ticker': ticker, 'writer': update_writer})
 
+        readers = [trade_reader, quote_reader, bar_reader, update_reader];
+
+        # calculate how much cash each ticker gets to invest (0 if there's already an active position)
+        # from that, get the number of shares able to be bought. -0.05 to ensure order goes through
+        investable_cash = account_setup.calc_investable_cash(cash, ticker, positions)
+        investable_qty = int(investable_cash / (api.get_last_trade(ticker).price - 0.05))
+
         # creating processes for each ticker
         process = multiprocessing.Process(target=work, args=(
             logging_queue,
             child_order_pipe,
-            trade_reader,
-            quote_reader,
-            bar_reader,
-            update_reader,
-            ticker,))
+            readers,
+            ticker,
+            investable_qty))
         child_processes.append(process)
 
         #subscribing to each ticker
@@ -203,7 +204,7 @@ def start_loop():
     logger_thread.start()
 
     # thread to handle api requests from Alpaca, and feed children
-    api_thread = threading.Thread(target=transaction.listen, args=(parent_order_pipe,), daemon=True)
+    api_thread = threading.Thread(target=transaction.listen, args=(parent_order_pipe, api,), daemon=True)
     api_thread.start()
 
     for process in child_processes:
@@ -224,11 +225,9 @@ def start_loop():
 
 def work(logging_queue,
          order_pipe,
-         trade_reader,
-         quote_reader,
-         bar_reader,
-         update_reader,
-         ticker):
+         readers,
+         ticker,
+         investable_qty):
 
     # setting up logging/signals
     signal(SIGINT, SIG_IGN) # ignore all interupts on sub processes
@@ -238,10 +237,8 @@ def work(logging_queue,
     # choose our algorithm can put any here
     algorithm = macd_rsi(ticker,
                          order_pipe,
-                         trade_reader,
-                         quote_reader,
-                         bar_reader,
-                         update_reader)
+                         readers,
+                         investable_qty)
     try:
         algorithm.run()
     except FunctionTimedOut as e:

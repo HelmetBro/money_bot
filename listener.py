@@ -17,12 +17,12 @@ class listener:
 	updates_has_update = False
 	bars_has_update    = False
 
-	def __init__(self, trade_reader, quote_reader, bar_reader, update_reader):
+	def __init__(self, readers):
 		# make request(s) to get account data when created first before doing the below W.I.P.
-		threading.Thread(target=self.trades_listener, args=(trade_reader,), daemon=True).start()
-		threading.Thread(target=self.quotes_listener, args=(quote_reader,), daemon=True).start()
-		threading.Thread(target=self.bars_listener, args=(bar_reader,), daemon=True).start()
-		threading.Thread(target=self.updates_listener, args=(update_reader,), daemon=True).start()
+		threading.Thread(target=self.trades_listener, args=(readers[0],), daemon=True).start()
+		threading.Thread(target=self.quotes_listener, args=(readers[1],), daemon=True).start()
+		threading.Thread(target=self.bars_listener, args=(readers[2],), daemon=True).start()
+		threading.Thread(target=self.updates_listener, args=(readers[3],), daemon=True).start()
 
 	def trades_listener(self, listener):
 		while True:

@@ -1,17 +1,12 @@
-from waiting import wait
-
 import algorithm
 import logger
 import transaction
 import algo_math
-
-import time
-def current_milli_time():
-	return round(time.time() * 1000)
+import threading
 
 class macd_rsi(algorithm.algorithm):
-	buying_power = 0
 	ticker = None
+	qty = 0
 
 	long_period_macd  = 26 # past 26 mintues
 	short_period_macd = 12 # past 12 mintues
@@ -21,9 +16,28 @@ class macd_rsi(algorithm.algorithm):
 	rsi_upper_bound = 66.66
 	rsi_lower_bound = 33.33
 
-	def __init__(self, ticker, order_pipe, trade_reader, quote_reader, bar_reader, update_reader):
-		super().__init__(order_pipe, trade_reader, quote_reader, bar_reader, update_reader)
+	def __init__(self, ticker, order_pipe, readers, investable_qty):
+		super().__init__(order_pipe, readers)
 		self.ticker = ticker
+		self.qty = investable_qty
+		threading.Thread(target=self.update_qty, args=(), daemon=True).start()
+
+	def update_qty(self):
+		while True:
+			super().on_updates()
+			update = super().get_updates(1)
+
+			if update.event == 'fill':
+
+				if update.side == 'buy':
+					self.qty += update.filled_qty
+					if (self.qty == 0):
+						raise Exception("{} qty is 0 after sell order!".format(self.ticker))
+
+				if update.side == 'sell':
+					self.qty -= update.filled_qty
+					if (self.qty != 0):
+						raise Exception("{} qty is not 0 after sell order!".format(self.ticker))
 
 	def run(self):
 		while True:
@@ -48,11 +62,11 @@ class macd_rsi(algorithm.algorithm):
 	def buy_or_sell_macd_rsi(self, macd_signal_result, rsi_result):
 		# buy as much as possible
 		if macd_signal_result > 0 and rsi_result < self.rsi_lower_bound:
-			transaction.market_buy(super.order_pipe, self.ticker, self.buying_power)
+			transaction.market_buy_qty(self.order_pipe, self.ticker, self.qty)
 
 		# liquidate entire position
 		elif macd_signal_result < 0 and rsi_result > self.rsi_upper_bound:
-			transaction.market_liquidate(super.order_pipe, self.ticker)
+			transaction.market_liquidate(self.order_pipe, self.ticker)
 
 		# if undesireable, don't make a transaction
 		else:

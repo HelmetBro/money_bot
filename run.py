@@ -1,6 +1,7 @@
 import os
 import argparse
 import infrastructure
+import traceback
 from signal import signal, SIGABRT, SIGINT, SIGTERM
 
 # parsing arguments and setting global BACKTRADING var
@@ -26,4 +27,5 @@ if __name__ == "__main__":
             signal(sig, main_process_cleanup)
         infrastructure.main()
     except Exception as e:
+        traceback.print_exc()
         main_process_cleanup()

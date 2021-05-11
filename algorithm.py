@@ -2,7 +2,6 @@ from waiting import wait
 
 import listener
 import pandas
-import run
 
 class algorithm(listener.listener):
 
@@ -19,14 +18,9 @@ class algorithm(listener.listener):
 	live_bars_data_pd    = pandas.DataFrame(columns=['o', 'h', 'l', 'c', 'v'])
 	live_updates_data_pd = pandas.DataFrame()
 
-	account = None # need to init this on start up
-
-	def __init__(self, order_pipe, trade_reader, quote_reader, bar_reader, update_reader):
-		super().__init__(trade_reader, quote_reader, bar_reader, update_reader)
+	def __init__(self, order_pipe, readers):
+		super().__init__(readers)
 		self.order_pipe = order_pipe
-
-	def get_account(self):
-		return self.account
 
 	def get_trades(self, period):
 		return self.live_trades_data_pd[0:period]

@@ -1,16 +1,14 @@
 import logger
+from run import BACKTRADING as BACKTRADING
 
 TIMEOUT = 9
 
 # to be run in a thread by the main process
-def listen(pipe):
-	import alpaca_trade_api as trader_api
-	api = trader_api.REST()
+def listen(pipe, api):
+	# listen to pipe, and submit requests accordingly
 	while True:
-		# listen to pipe, and submit requests accordingly
 		transaction = pipe.recv()
-		order = transaction.submit(api)
-		pipe.send(order)
+		transaction.submit(api)
 
 class transaction:
 	# pipe where transaction is sent upstream
@@ -22,8 +20,7 @@ class transaction:
 	side 		     = None
 	order_type       = None # market/limit/etc
 	transaction_type = None # quantity or notional
-	qty 	      	 = None
-	notional      	 = None
+	value	      	 = None
 
 	# There are two types of transactions- a transation can be sent with quantity, or notion (money amount).
 
@@ -33,36 +30,14 @@ class transaction:
 		self.ticker = ticker
 		self.side = side
 		self.order_type = order_type
+		self.value = value
 		self.time_in_force = time_in_force
-
-		if transaction_type == 'notional':
-			self.notional = value
-		if transaction_type == 'quantity':
-			self.qty = value
-
-		# cancel all current orders
-
-		# if backtrader_setup.BACKTRADER:
-		# 	if trader is None:
-		# 		raise Exception("trader cannot be None when backtrading!")
-		# 	if trader.position:
-		# 		return # current positions don't submit buy orders
-		# 	logger.logp("submitted buy order for {} at {}!".format(self.ticker, backtrader_setup.data_frame['close'][0]))
-		# 	return trader.buy(
-		# 		size=int(trader.broker.get_cash() / backtrader_setup.data_frame['close'][0]))
-		# 	# return trader.buy(
-		# 	#     price=backtrader_setup.data_frame['open'][0],
-		# 	#     exectype=backtrader.Order.Limit)
-
-		# if self.has_position():
-		# 	logger.log("position already exists with {} shares!".format(self.position.qty), 'debug')
-		# 	return
 
 	# only to be called by main processes sub-thread, listen()
 	def submit(self, api):
 
 		# negative qty? liquidate asset.
-		if self.qty < 0:
+		if self.transaction_type == 'quantity' and self.value < 0:
 			"liquidating asset: {}".format(self.ticker)
 			logger.logp("liquidating asset: {}".format(self.ticker))
 			return api.close_position(self.ticker)
@@ -92,14 +67,15 @@ class transaction:
 		return order
 
 	def get_info(self):
-		return "submitted order: {}, qty {}, side {}, type {}, tif {}".format(
-			self.ticker,
-			self.qty,
-			self.side,
-			self.order_type,
-			self.time_in_force)
+		return "submitted order: ticker [{}] transaction type [{}] side [{}] order type [{}] value [{}] tif [{}]".format(
+					self.ticker,
+					self.transaction_type,
+					self.side,
+					self.order_type,
+					self.value,
+					self.time_in_force)
 
-def market_buy(order_pipe, ticker, notional):
+def market_buy_notional(order_pipe, ticker, notional):
 	t = transaction(
 		order_pipe       = order_pipe,
 		transaction_type = 'notional',
@@ -108,18 +84,24 @@ def market_buy(order_pipe, ticker, notional):
 		order_type       = 'market',
 		value            = notional,
 		time_in_force    = 'fok')
+	if BACKTRADING:
+		logger.logp(t.get_info())
+		return
 	order_pipe.send(t)
-	return order_pipe.recv() # probably modify this code, and add locks. look at transaction.listen
 
-# def market_buy(order_pipe, ticker, qty):
-# 	t = transaction(order_pipe, ticker, 'buy', 'market', qty, 'fok')
-# 	order_pipe.send(t)
-# 	return order_pipe.recv()
-
-# def market_sell(order_pipe, ticker, qty):
-# 	t = transaction(order_pipe, ticker, 'sell', 'market', qty, 'fok')
-# 	order_pipe.send(t)
-# 	return order_pipe.recv()
+def market_buy_qty(order_pipe, ticker, qty):
+	t = transaction(
+		order_pipe       = order_pipe,
+		transaction_type = 'quantity',
+		ticker           = ticker,
+		side             = 'buy',
+		order_type       = 'market',
+		value            = qty,
+		time_in_force    = 'fok')
+	if BACKTRADING:
+		logger.logp(t.get_info())
+		return
+	order_pipe.send(t)
 
 # liquidates a position at market price
 def market_liquidate(order_pipe, ticker):
@@ -131,5 +113,7 @@ def market_liquidate(order_pipe, ticker):
 		order_type       = 'market',
 		value            = -1,
 		time_in_force    = 'fok')
+	if BACKTRADING:
+		logger.logp(t.get_info())
+		return
 	order_pipe.send(t)
-	return order_pipe.recv()
