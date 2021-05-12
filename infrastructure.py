@@ -27,9 +27,9 @@ api = tradeapi.REST()
 stream = Stream(data_feed=FEED, raw_data=True)
 
 # tickers = ['BBBY', 'GME', 'NOK', 'AMC', 'SNDL', 'NAKD', 'CTRM', 'TRCH', 'IDEX', 'CCIV']
-# tickers = ['GOVX', 'TGC', 'IDEX', 'PLTR', 'CNSP', 'USX', 'GRNQ', 'VISL', 'TRXC']
+tickers = ['GOVX', 'TRCH', 'IDEX', 'PLTR', 'CNSP', 'USX', 'GRNQ', 'VISL', 'CCIV']
 # tickers = ['TSLA', 'AAPL', 'MSFT']
-tickers = ['TSLA']
+# tickers = ['TSLA']
 
 # used only for main process to join() upon termination. do NOT use a process pool
 child_processes = []
@@ -126,13 +126,14 @@ async def bars_callback(b):
             stream['writer'].send(b)
 
 async def updates_callback(u):
-    del u['T']
-    ticker = u.pop('S', None)
     for stream in updates_stream:
-        if stream['ticker'] == ticker:
+        if stream['ticker'] == u.symbol:
             stream['writer'].send(u)
 
 def main():
+    # check if there's duplicates in tickers
+
+
     # check all tickers to ensure they're supported by Alpaca
     for ticker in tickers:
         try:
