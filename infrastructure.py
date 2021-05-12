@@ -152,7 +152,7 @@ def main():
     positions = account_setup.add_current_tickers(api, tickers)
 
     # starting our main process
-    start_loop(positions, account.cash)
+    start_loop(positions, float(account.cash))
 
 def start_loop(positions, cash):
     logging_queue = logger.main_setup()
@@ -181,7 +181,7 @@ def start_loop(positions, cash):
 
         # calculate how much cash each ticker gets to invest (0 if there's already an active position)
         # from that, get the number of shares able to be bought. -0.05 to ensure order goes through
-        investable_cash = account_setup.calc_investable_cash(cash, ticker, positions)
+        investable_cash = account_setup.calc_investable_cash(cash, ticker, tickers, positions)
         investable_qty = int(investable_cash / (api.get_last_trade(ticker).price - 0.05))
 
         # creating processes for each ticker

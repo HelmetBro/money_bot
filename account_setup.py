@@ -38,10 +38,10 @@ def add_current_tickers(api, tickers):
             tickers.append(pos.symbol)
     return positions
 
-def calc_investable_cash(cash, ticker, positions):
+def calc_investable_cash(cash, ticker, tickers, positions):
     for pos in positions:
         if ticker == pos.symbol:
             return 0
 
-    num_new_positions = len(ticker) - len(positions)
+    num_new_positions = len(tickers) - len(positions)
     return int(cash / num_new_positions)
