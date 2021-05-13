@@ -1,6 +1,3 @@
-import logger
-from func_timeout import func_set_timeout
-
 # @func_set_timeout(TIMEOUT)
 # def buy_and_sell_david_custom(events):
 #     # run both strats
