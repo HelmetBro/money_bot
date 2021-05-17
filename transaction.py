@@ -63,7 +63,7 @@ class transaction:
 		else:
 			logger.logp('FATAL ERROR! incorrect transaction type')
 
-		logger.logp(self.get_info())
+		logger.log(self.get_info())
 		return order
 
 	def get_info(self):

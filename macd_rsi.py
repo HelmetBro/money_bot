@@ -8,13 +8,13 @@ class macd_rsi(algorithm.algorithm):
 	ticker = None
 	qty = 0
 
-	long_period_macd  = 6 # past 26 mintues
-	short_period_macd = 3 # past 12 mintues
-	period_rsi        = 3 # past 14 mintues
-	signal_ema_period = 2  # past 9 mintues
+	long_period_macd  = 26 # past 26 mintues
+	short_period_macd = 12 # past 12 mintues
+	period_rsi        = 14 # past 14 mintues
+	signal_ema_period = 9  # past 9 mintues
 
-	rsi_upper_bound = 52#66.66
-	rsi_lower_bound = 48#33.33
+	rsi_upper_bound = 60#66.66
+	rsi_lower_bound = 40#33.33
 
 	def __init__(self, ticker, order_pipe, readers, investable_qty):
 		super().__init__(order_pipe, readers)

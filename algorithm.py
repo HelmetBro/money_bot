@@ -1,11 +1,12 @@
 import listener
 import pandas
+import numpy
 
 class algorithm(listener.listener):
 
 	# max size for stored data. when this limit is reached, data lists
 	# and pd's are all halfed (down to 100)
-	MAX_DATA_SIZE = 200
+	MAX_DATA_SIZE = 50
 
 	# pipe to send transactions through to main interface. stored here so all algo's can use
 	order_pipe = None
@@ -41,7 +42,9 @@ class algorithm(listener.listener):
 		self.live_trades_data_pd.loc[len(self.live_trades_data_pd)] = self.trades_data
 
 		if len(self.live_trades_data_pd) >= self.MAX_DATA_SIZE:
-			self.live_trades_data_pd = self.live_trades_data_pd[-int(self.MAX_DATA_SIZE/2) or None:]
+			self.live_trades_data_pd = numpy.array_split(self.live_trades_data_pd, 2)[1]
+			self.live_trades_data_pd.reset_index(drop=True, inplace=True)
+
 
 		self.trades_data_lock.release()
 
@@ -59,7 +62,9 @@ class algorithm(listener.listener):
 		self.live_quotes_data_pd.loc[len(self.live_quotes_data_pd)] = self.quotes_data
 
 		if len(self.live_quotes_data_pd) >= self.MAX_DATA_SIZE:
-			self.live_quotes_data_pd = self.live_quotes_data_pd[-int(self.MAX_DATA_SIZE/2) or None:]
+			self.live_quotes_data_pd = numpy.array_split(self.live_quotes_data_pd, 2)[1]
+			self.live_quotes_data_pd.reset_index(drop=True, inplace=True)
+
 
 		self.quotes_data_lock.release()
 
@@ -77,7 +82,8 @@ class algorithm(listener.listener):
 		self.live_bars_data_pd.loc[len(self.live_bars_data_pd)] = self.bars_data
 
 		if len(self.live_bars_data_pd) >= self.MAX_DATA_SIZE:
-			self.live_bars_data_pd = self.live_bars_data_pd[-int(self.MAX_DATA_SIZE/2) or None:]
+			self.live_bars_data_pd = numpy.array_split(self.live_bars_data_pd, 2)[1]
+			self.live_bars_data_pd.reset_index(drop=True, inplace=True)
 
 		self.bars_data_lock.release()
 
@@ -95,7 +101,8 @@ class algorithm(listener.listener):
 		self.live_updates_data.append(self.updates_data)
 
 		if len(self.live_updates_data) >= self.MAX_DATA_SIZE:
-			self.live_updates_data = self.live_updates_data[-int(self.MAX_DATA_SIZE/2) or None:]
+			self.live_updates_data = numpy.array_split(self.live_updates_data, 2)[1]
+			self.live_updates_data.reset_index(drop=True, inplace=True)
 
 		self.updates_data_lock.release()
 

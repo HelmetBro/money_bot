@@ -213,7 +213,7 @@ def start_loop(positions, cash):
         asyncio.set_event_loop(new_loop)
         while True:
             for x in range(30):
-                time.sleep(0.5)
+                time.sleep(0.1)
                 asyncio.run(bars_callback(copy.deepcopy(tsla_bars[x])))
         asyncio.set_event_loop(old_loop)
 

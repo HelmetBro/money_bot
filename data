@@ -523,3 +523,69 @@ Traceback (most recent call last):
     raise APIError(error, http_error)
 alpaca_trade_api.rest.APIError: position does not exist
 {'T': 'b', 'S': 'TSLA', 'o': 587.21, 'h': 587.31, 'l': 587.03, 'c': 587.21, 'v': 2275, 't': Timestamp(seconds=1621017900, nanoseconds=0)}
+
+
+
+
+
+
+
+
+
+
+
+
+TSLA -> macd_signal: 0.13291920777057134, rsi: 37.44131455399061 no trade signal thrown
+Must have equal len keys and value when setting with an iterable
+Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.9/lib/python3.9/multiprocessing/queues.py", line 245, in _feed
+    obj = _ForkingPickler.dumps(obj)
+  File "/Library/Frameworks/Python.framework/Versions/3.9/lib/python3.9/multiprocessing/reduction.py", line 51, in dumps
+    cls(buf, protocol).dump(obj)
+TypeError: cannot pickle 'traceback' object
+Traceback (most recent call last):
+  File "/Users/eric/stock_bot_alpaca/infrastructure.py", line 235, in work
+    algorithm.run()
+  File "/Users/eric/stock_bot_alpaca/macd_rsi.py", line 44, in run
+    bars = super().on_bars_get(self.long_period_macd)
+  File "/Users/eric/stock_bot_alpaca/algorithm.py", line 85, in on_bars_get
+    self.on_bars()
+  File "/Users/eric/stock_bot_alpaca/algorithm.py", line 77, in on_bars
+    self.live_bars_data_pd.loc[len(self.live_bars_data_pd)] = self.bars_data
+  File "/Library/Frameworks/Python.framework/Versions/3.9/lib/python3.9/site-packages/pandas/core/indexing.py", line 692, in __setitem__
+    iloc._setitem_with_indexer(indexer, value, self.name)
+  File "/Library/Frameworks/Python.framework/Versions/3.9/lib/python3.9/site-packages/pandas/core/indexing.py", line 1635, in _setitem_with_indexer
+    self._setitem_with_indexer_split_path(indexer, value, name)
+  File "/Library/Frameworks/Python.framework/Versions/3.9/lib/python3.9/site-packages/pandas/core/indexing.py", line 1711, in _setitem_with_indexer_split_path
+    raise ValueError(
+ValueError: Must have equal len keys and value when setting with an iterable
+Traceback (most recent call last):
+  File "/Users/eric/stock_bot_alpaca/run.py", line 28, in <module>
+    infrastructure.main()
+  File "/Users/eric/stock_bot_alpaca/infrastructure.py", line 150, in main
+    start_loop(positions, float(account.cash))
+  File "/Users/eric/stock_bot_alpaca/infrastructure.py", line 217, in start_loop
+    asyncio.run(bars_callback(copy.deepcopy(tsla_bars[x])))
+  File "/Library/Frameworks/Python.framework/Versions/3.9/lib/python3.9/asyncio/runners.py", line 44, in run
+    return loop.run_until_complete(main)
+  File "/Library/Frameworks/Python.framework/Versions/3.9/lib/python3.9/asyncio/base_events.py", line 642, in run_until_complete
+    return future.result()
+  File "/Users/eric/stock_bot_alpaca/infrastructure.py", line 119, in bars_callback
+    stream['writer'].send(b)
+  File "/Library/Frameworks/Python.framework/Versions/3.9/lib/python3.9/multiprocessing/connection.py", line 211, in send
+    self._send_bytes(_ForkingPickler.dumps(obj))
+  File "/Library/Frameworks/Python.framework/Versions/3.9/lib/python3.9/multiprocessing/connection.py", line 416, in _send_bytes
+    self._send(header + buf)
+  File "/Library/Frameworks/Python.framework/Versions/3.9/lib/python3.9/multiprocessing/connection.py", line 373, in _send
+    n = write(self._handle, buf)
+BrokenPipeError: [Errno 32] Broken pipe
+
+terminating child process 8156
+terminating child process 8157
+terminating child process 8158
+terminating child process 8159
+terminating child process 8160
+terminating main process 8154
+fish: Job 1, 'python3  $argv' terminated by signal SIGABRT (Abort)
+/Library/Frameworks/Python.framework/Versions/3.9/lib/python3.9/multiprocessing/resource_tracker.py:216: UserWarning: resource_tracker: There appear to be 3 leaked semaphore objects to clean up at shutdown
+  warnings.warn('resource_tracker: There appear to be %d '
