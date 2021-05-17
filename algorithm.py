@@ -24,13 +24,10 @@ class algorithm(listener.listener):
 
 	def get_trades(self, period):
 		return self.live_trades_data_pd.iloc[-period:]
-
 	def get_quotes(self, period):
 		return self.live_quotes_data_pd.iloc[-period:]
-
 	def get_bars(self, period):
 		return self.live_bars_data_pd.iloc[-period:]
-
 	def get_updates(self, period):
 		return self.live_updates_data[-period:]
 
@@ -47,6 +44,9 @@ class algorithm(listener.listener):
 
 		self.trades_has_update = False
 		self.trades_lock.release()
+	def on_trades(self, period):
+		self.on_trades()
+		return self.get_trades(period)
 
 	def on_quotes(self):
 		# storing and appending to a list is much faster than a df. concating a df is fast.
@@ -59,6 +59,9 @@ class algorithm(listener.listener):
 
 		self.quotes_has_update = False
 		self.quotes_lock.release()
+	def on_quotes(self, period):
+		self.on_quotes()
+		return self.get_quotes(period)
 
 	def on_bars(self):
 		# storing and appending to a list is much faster than a df. concating a df is fast.
@@ -71,6 +74,9 @@ class algorithm(listener.listener):
 
 		self.bars_has_update = False
 		self.bars_lock.release()
+	def on_bars(self, period):
+		self.on_bars()
+		return self.get_bars(period)
 
 	def on_updates(self):
 		# storing and appending to a list is much faster than a df. concating a df is fast.
@@ -83,3 +89,6 @@ class algorithm(listener.listener):
 
 		self.updates_has_update = False
 		self.updates_lock.release()
+	def on_updates(self, period):
+		self.on_updates()
+		return self.get_updates(period)

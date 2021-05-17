@@ -467,3 +467,59 @@ print(b['t'].nanoseconds)
 Timestamp(seconds=1620330360, nanoseconds=0)
 1620330360
 0
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+{'T': 'b', 'S': 'TSLA', 'o': 587.11, 'h': 587.11, 'l': 586.98, 'c': 586.98, 'v': 884, 't': Timestamp(seconds=1621017840, nanoseconds=0)}
+AAPL -> macd_signal: 0.009946472359784353, rsi: 75.99999999999909 no trade signal thrown
+liquidating asset: TSLA
+Exception in thread Thread-2:
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.9/site-packages/alpaca_trade_api/rest.py", line 160, in _one_request
+    resp.raise_for_status()
+  File "/home/pi/.local/lib/python3.9/site-packages/requests/models.py", line 943, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 404 Client Error: Not Found for url: https://paper-api.alpaca.markets/v2/positions/TSLA
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.9/threading.py", line 950, in _bootstrap_inner
+    self.run()
+  File "/usr/local/lib/python3.9/threading.py", line 888, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/pi/stock_bot_alpaca/transaction.py", line 11, in listen
+    transaction.submit(api)
+  File "/home/pi/stock_bot_alpaca/transaction.py", line 43, in submit
+    return api.close_position(self.ticker)
+  File "/home/pi/.local/lib/python3.9/site-packages/alpaca_trade_api/rest.py", line 421, in close_position
+    resp = self.delete('/positions/{}'.format(symbol))
+  File "/home/pi/.local/lib/python3.9/site-packages/alpaca_trade_api/rest.py", line 188, in delete
+    return self._request('DELETE', path, data)
+  File "/home/pi/.local/lib/python3.9/site-packages/alpaca_trade_api/rest.py", line 139, in _request
+    return self._one_request(method, url, opts, retry)
+  File "/home/pi/.local/lib/python3.9/site-packages/alpaca_trade_api/rest.py", line 168, in _one_request
+    raise APIError(error, http_error)
+alpaca_trade_api.rest.APIError: position does not exist
+{'T': 'b', 'S': 'TSLA', 'o': 587.21, 'h': 587.31, 'l': 587.03, 'c': 587.21, 'v': 2275, 't': Timestamp(seconds=1621017900, nanoseconds=0)}

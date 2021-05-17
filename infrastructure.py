@@ -27,8 +27,8 @@ api = tradeapi.REST()
 stream = Stream(data_feed=FEED, raw_data=True)
 
 # tickers = ['BBBY', 'GME', 'NOK', 'AMC', 'SNDL', 'NAKD', 'CTRM', 'TRCH', 'IDEX', 'CCIV']
-tickers = ['GOVX', 'TRCH', 'IDEX', 'PLTR', 'CNSP', 'USX', 'GRNQ', 'VISL', 'CCIV']
-# tickers = ['TSLA', 'AAPL', 'MSFT']
+# tickers = ['GOVX', 'TRCH', 'IDEX', 'PLTR', 'CNSP', 'USX', 'GRNQ', 'VISL', 'CCIV']
+tickers = ['TSLA', 'AAPL', 'MSFT']
 # tickers = ['TSLA']
 
 # used only for main process to join() upon termination. do NOT use a process pool
@@ -70,63 +70,58 @@ updates_stream = []
 # b7 = {'T': 'b', 'S': 'MSFT', 'o': 251.265, 'h': 251.335, 'l': 251.25, 'c': 251.25, 'v': 2236}
 # b8 = {'T': 'b', 'S': 'AAPL', 'o': 133.37, 'h': 133.39, 'l': 133.37, 'c': 133.38, 'v': 895}
 
-# tsla_bars = [
-#     {'T': 'b', 'S': 'TSLA', 'o': 5, 'h': 672.94, 'l': 672.61, 'c': 5.23, 'v': 729},
-#     {'T': 'b', 'S': 'TSLA', 'o': 5, 'h': 672.94, 'l': 672.61, 'c': 7.51, 'v': 729},
-#     {'T': 'b', 'S': 'TSLA', 'o': 5, 'h': 672.94, 'l': 672.61, 'c': 5.85, 'v': 729},
-#     {'T': 'b', 'S': 'TSLA', 'o': 5, 'h': 672.94, 'l': 672.61, 'c': 3.91, 'v': 729},
-#     {'T': 'b', 'S': 'TSLA', 'o': 5, 'h': 672.94, 'l': 672.61, 'c': 5.96, 'v': 729},
-#     {'T': 'b', 'S': 'TSLA', 'o': 5, 'h': 672.94, 'l': 672.61, 'c': 9.75, 'v': 729},
-#     {'T': 'b', 'S': 'TSLA', 'o': 5, 'h': 672.94, 'l': 672.61, 'c': 5.95, 'v': 729},
-#     {'T': 'b', 'S': 'TSLA', 'o': 5, 'h': 672.94, 'l': 672.61, 'c': 1.19, 'v': 729},
-#     {'T': 'b', 'S': 'TSLA', 'o': 5, 'h': 672.94, 'l': 672.61, 'c': 4.10, 'v': 729},
-#     {'T': 'b', 'S': 'TSLA', 'o': 5, 'h': 672.94, 'l': 672.61, 'c': 5.32, 'v': 729},
-#     {'T': 'b', 'S': 'TSLA', 'o': 5, 'h': 672.94, 'l': 672.61, 'c': 6.63, 'v': 729},
-#     {'T': 'b', 'S': 'TSLA', 'o': 5, 'h': 672.94, 'l': 672.61, 'c': 5.85, 'v': 729},
-#     {'T': 'b', 'S': 'TSLA', 'o': 5, 'h': 672.94, 'l': 672.61, 'c': 4.94, 'v': 729},
-#     {'T': 'b', 'S': 'TSLA', 'o': 5, 'h': 672.94, 'l': 672.61, 'c': 2.94, 'v': 729},
-#     {'T': 'b', 'S': 'TSLA', 'o': 5, 'h': 672.94, 'l': 672.61, 'c': 4.01, 'v': 729},
-#     {'T': 'b', 'S': 'TSLA', 'o': 5, 'h': 672.94, 'l': 672.61, 'c': 6.94, 'v': 729},
-#     {'T': 'b', 'S': 'TSLA', 'o': 4, 'h': 672.94, 'l': 672.61, 'c': 9.18, 'v': 729},
-#     {'T': 'b', 'S': 'TSLA', 'o': 4, 'h': 672.94, 'l': 672.61, 'c': 6.56, 'v': 729},
-#     {'T': 'b', 'S': 'TSLA', 'o': 4, 'h': 672.94, 'l': 672.61, 'c': 1.23, 'v': 729},
-#     {'T': 'b', 'S': 'TSLA', 'o': 4, 'h': 672.94, 'l': 672.61, 'c': 4.42, 'v': 729},
-#     {'T': 'b', 'S': 'TSLA', 'o': 3, 'h': 672.94, 'l': 672.61, 'c': 3.45, 'v': 729},
-#     {'T': 'b', 'S': 'TSLA', 'o': 3, 'h': 672.94, 'l': 672.61, 'c': 10.95, 'v': 729},
-#     {'T': 'b', 'S': 'TSLA', 'o': 3, 'h': 672.94, 'l': 672.61, 'c': 30.11, 'v': 729},
-#     {'T': 'b', 'S': 'TSLA', 'o': 30, 'h': 672.94, 'l': 672.61, 'c': 70.54, 'v': 729},
-#     {'T': 'b', 'S': 'TSLA', 'o': 70, 'h': 672.94, 'l': 672.61, 'c': 60.23, 'v': 729},
-#     {'T': 'b', 'S': 'TSLA', 'o': 70, 'h': 672.94, 'l': 672.61, 'c': 70.77, 'v': 729},
-#     {'T': 'b', 'S': 'TSLA', 'o': 70, 'h': 672.94, 'l': 672.61, 'c': 80.01, 'v': 729},
-#     {'T': 'b', 'S': 'TSLA', 'o': 80, 'h': 672.94, 'l': 672.61, 'c': 90.74, 'v': 729},
-#     {'T': 'b', 'S': 'TSLA', 'o': 90, 'h': 672.94, 'l': 672.61, 'c': 100.47, 'v': 729},
-#     {'T': 'b', 'S': 'TSLA', 'o': 100, 'h': 672.94, 'l': 672.61, 'c': 500.11, 'v': 729},
-# ]
+tsla_bars = [
+    {'T': 'b', 'S': 'TSLA', 'o': 5, 'h': 672.94, 'l': 672.61, 'c': 5.23, 'v': 729},
+    {'T': 'b', 'S': 'TSLA', 'o': 5, 'h': 672.94, 'l': 672.61, 'c': 7.51, 'v': 729},
+    {'T': 'b', 'S': 'TSLA', 'o': 5, 'h': 672.94, 'l': 672.61, 'c': 5.85, 'v': 729},
+    {'T': 'b', 'S': 'TSLA', 'o': 5, 'h': 672.94, 'l': 672.61, 'c': 3.91, 'v': 729},
+    {'T': 'b', 'S': 'TSLA', 'o': 5, 'h': 672.94, 'l': 672.61, 'c': 5.96, 'v': 729},
+    {'T': 'b', 'S': 'TSLA', 'o': 5, 'h': 672.94, 'l': 672.61, 'c': 9.75, 'v': 729},
+    {'T': 'b', 'S': 'TSLA', 'o': 5, 'h': 672.94, 'l': 672.61, 'c': 5.95, 'v': 729},
+    {'T': 'b', 'S': 'TSLA', 'o': 5, 'h': 672.94, 'l': 672.61, 'c': 1.19, 'v': 729},
+    {'T': 'b', 'S': 'TSLA', 'o': 5, 'h': 672.94, 'l': 672.61, 'c': 4.10, 'v': 729},
+    {'T': 'b', 'S': 'TSLA', 'o': 5, 'h': 672.94, 'l': 672.61, 'c': 5.32, 'v': 729},
+    {'T': 'b', 'S': 'TSLA', 'o': 5, 'h': 672.94, 'l': 672.61, 'c': 6.63, 'v': 729},
+    {'T': 'b', 'S': 'TSLA', 'o': 5, 'h': 672.94, 'l': 672.61, 'c': 5.85, 'v': 729},
+    {'T': 'b', 'S': 'TSLA', 'o': 5, 'h': 672.94, 'l': 672.61, 'c': 4.94, 'v': 729},
+    {'T': 'b', 'S': 'TSLA', 'o': 5, 'h': 672.94, 'l': 672.61, 'c': 2.94, 'v': 729},
+    {'T': 'b', 'S': 'TSLA', 'o': 5, 'h': 672.94, 'l': 672.61, 'c': 4.01, 'v': 729},
+    {'T': 'b', 'S': 'TSLA', 'o': 5, 'h': 672.94, 'l': 672.61, 'c': 6.94, 'v': 729},
+    {'T': 'b', 'S': 'TSLA', 'o': 4, 'h': 672.94, 'l': 672.61, 'c': 9.18, 'v': 729},
+    {'T': 'b', 'S': 'TSLA', 'o': 4, 'h': 672.94, 'l': 672.61, 'c': 6.56, 'v': 729},
+    {'T': 'b', 'S': 'TSLA', 'o': 4, 'h': 672.94, 'l': 672.61, 'c': 1.23, 'v': 729},
+    {'T': 'b', 'S': 'TSLA', 'o': 4, 'h': 672.94, 'l': 672.61, 'c': 4.42, 'v': 729},
+    {'T': 'b', 'S': 'TSLA', 'o': 3, 'h': 672.94, 'l': 672.61, 'c': 3.45, 'v': 729},
+    {'T': 'b', 'S': 'TSLA', 'o': 3, 'h': 672.94, 'l': 672.61, 'c': 10.95, 'v': 729},
+    {'T': 'b', 'S': 'TSLA', 'o': 3, 'h': 672.94, 'l': 672.61, 'c': 30.11, 'v': 729},
+    {'T': 'b', 'S': 'TSLA', 'o': 30, 'h': 672.94, 'l': 672.61, 'c': 70.54, 'v': 729},
+    {'T': 'b', 'S': 'TSLA', 'o': 70, 'h': 672.94, 'l': 672.61, 'c': 60.23, 'v': 729},
+    {'T': 'b', 'S': 'TSLA', 'o': 70, 'h': 672.94, 'l': 672.61, 'c': 70.77, 'v': 729},
+    {'T': 'b', 'S': 'TSLA', 'o': 70, 'h': 672.94, 'l': 672.61, 'c': 80.01, 'v': 729},
+    {'T': 'b', 'S': 'TSLA', 'o': 80, 'h': 672.94, 'l': 672.61, 'c': 90.74, 'v': 729},
+    {'T': 'b', 'S': 'TSLA', 'o': 90, 'h': 672.94, 'l': 672.61, 'c': 100.47, 'v': 729},
+    {'T': 'b', 'S': 'TSLA', 'o': 100, 'h': 672.94, 'l': 672.61, 'c': 500.11, 'v': 729},
+]
 
 async def trade_callback(t):
-    del t['T']
-    ticker = t.pop('S', None)
     for stream in trade_stream:
-        if stream['ticker'] == ticker:
+        if stream['ticker'] == t['S']:
             stream['writer'].send(t)
 
 async def quote_callback(q):
-    del q['T']
-    ticker = q.pop('S', None)
     for stream in quote_stream:
-        if stream['ticker'] == ticker:
+        if stream['ticker'] == q['S']:
             stream['writer'].send(q)
 
 async def bars_callback(b):
-    del b['T']
-    ticker = b.pop('S', None)
+    print(b)
     for stream in bars_stream:
-        if stream['ticker'] == ticker:
+        if stream['ticker'] == b['S']:
             stream['writer'].send(b)
 
 async def updates_callback(u):
     for stream in updates_stream:
-        if stream['ticker'] == u.symbol:
+        if stream['ticker'] == u['order'].symbol:
             stream['writer'].send(u)
 
 def main():
@@ -223,23 +218,19 @@ def start_loop(positions, cash):
 
     stream.run() # this is blocking
 
-def work(logging_queue,
-         order_pipe,
-         readers,
-         ticker,
-         investable_qty):
-
-    # setting up logging/signals
-    signal(SIGINT, SIG_IGN) # ignore all interupts on sub processes
-    logger.process_setup(logging_queue)
-    logger.logp("subprocess for {} started".format(ticker))
-
-    # choose our algorithm can put any here
-    algorithm = macd_rsi(ticker,
-                         order_pipe,
-                         readers,
-                         investable_qty)
+def work(logging_queue, order_pipe, readers, ticker, investable_qty):
     try:
+        # setting up logging/signals
+        signal(SIGINT, SIG_IGN) # ignore all interupts on sub processes
+        logger.process_setup(logging_queue)
+        logger.logp("subprocess for {} started".format(ticker))
+
+        # choose our algorithm can put any here
+        algorithm = macd_rsi(ticker,
+                            order_pipe,
+                            readers,
+                            investable_qty)
+
         algorithm.run()
     except FunctionTimedOut as e:
         logger.log("PID: {} TICKER: {} timed out! TIMEOUT = {}, retrying on next activation".format(os.getpid(), ticker, TIMEOUT), 'error')
