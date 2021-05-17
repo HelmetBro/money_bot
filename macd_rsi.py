@@ -24,7 +24,7 @@ class macd_rsi(algorithm.algorithm):
 
 	def update_qty(self):
 		while True:
-			update = super().on_updates(1)
+			update = super().on_updates_get(1)
 
 			if update.event == 'fill':
 
@@ -41,7 +41,7 @@ class macd_rsi(algorithm.algorithm):
 	def run(self):
 		while True:
 			# calling this only logs bars data
-			bars = super().on_bars(self.long_period_macd)
+			bars = super().on_bars_get(self.long_period_macd)
 
 			# only continue if we have sufficient data (longest data period)
 			if len(bars) < self.long_period_macd:

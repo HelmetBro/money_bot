@@ -28,7 +28,7 @@ stream = Stream(data_feed=FEED, raw_data=True)
 
 # tickers = ['BBBY', 'GME', 'NOK', 'AMC', 'SNDL', 'NAKD', 'CTRM', 'TRCH', 'IDEX', 'CCIV']
 # tickers = ['GOVX', 'TRCH', 'IDEX', 'PLTR', 'CNSP', 'USX', 'GRNQ', 'VISL', 'CCIV']
-tickers = ['TSLA', 'AAPL', 'MSFT']
+tickers = {'TSLA', 'AAPL', 'MSFT', 'SPY', 'QQQ'}
 # tickers = ['TSLA']
 
 # used only for main process to join() upon termination. do NOT use a process pool
@@ -114,7 +114,6 @@ async def quote_callback(q):
             stream['writer'].send(q)
 
 async def bars_callback(b):
-    print(b)
     for stream in bars_stream:
         if stream['ticker'] == b['S']:
             stream['writer'].send(b)
@@ -126,6 +125,7 @@ async def updates_callback(u):
 
 def main():
     # check if there's duplicates in tickers
+
 
 
     # check all tickers to ensure they're supported by Alpaca
@@ -207,6 +207,7 @@ def start_loop(positions, cash):
 
     # while BACKTRADING:
     if BACKTRADING:
+        time.sleep(1)
         old_loop = asyncio.get_event_loop()
         new_loop = asyncio.new_event_loop()
         asyncio.set_event_loop(new_loop)

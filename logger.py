@@ -1,8 +1,18 @@
 import os
 import multiprocessing
 import logging
+import time
 
 LOG_LEVEL = logging.INFO
+
+# for debugging
+class Trace:
+    def start(self):
+        self.start = time.time()
+    def end(self):
+        end = time.time()
+        delta = end-self.start
+        print("MS [{}] NS [{}]".format(round(delta * 1000), delta))
 
 def main_setup():
     FORMAT = '%(asctime)-15s | %(message)s'
