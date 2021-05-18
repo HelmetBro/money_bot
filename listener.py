@@ -34,7 +34,10 @@ class listener:
 			temp_data = listener.recv()
 			self.trades_data_lock.acquire()
 			self.trades_data = temp_data
-			self.trades_update_lock.release()
+			try:
+				self.trades_update_lock.release()
+			except:
+				pass
 			self.trades_data_lock.release()
 
 	def quotes_listener(self, listener):
@@ -42,7 +45,10 @@ class listener:
 			temp_data = listener.recv()
 			self.quotes_data_lock.acquire()
 			self.quotes_data = temp_data
-			self.quotes_update_lock.release()
+			try:
+				self.quotes_update_lock.release()
+			except:
+				pass
 			self.quotes_data_lock.release()
 
 	def bars_listener(self, listener):
@@ -50,7 +56,10 @@ class listener:
 			temp_data = listener.recv()
 			self.bars_data_lock.acquire()
 			self.bars_data = temp_data
-			self.bars_update_lock.release()
+			try:
+				self.bars_update_lock.release()
+			except:
+				pass
 			self.bars_data_lock.release()
 
 	def updates_listener(self, listener):
@@ -58,5 +67,8 @@ class listener:
 			temp_data = listener.recv()
 			self.updates_data_lock.acquire()
 			self.updates_data = temp_data
-			self.updates_update_lock.release()
+			try:
+				self.updates_update_lock.release()
+			except:
+				pass
 			self.updates_data_lock.release()

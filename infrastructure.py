@@ -124,10 +124,6 @@ async def updates_callback(u):
             stream['writer'].send(u)
 
 def main():
-    # check if there's duplicates in tickers
-
-
-
     # check all tickers to ensure they're supported by Alpaca
     for ticker in tickers:
         try:
@@ -192,7 +188,8 @@ def start_loop(positions, cash):
         stream.subscribe_trades(trade_callback, ticker)
         stream.subscribe_quotes(quote_callback, ticker)
         stream.subscribe_bars(bars_callback, ticker)
-        stream.subscribe_trade_updates(updates_callback)
+
+    stream.subscribe_trade_updates(updates_callback)
 
     # thread to initiate logging to run in a background thread on main process
     logger_thread = threading.Thread(target=logger.listen, daemon=True)
@@ -218,6 +215,8 @@ def start_loop(positions, cash):
         asyncio.set_event_loop(old_loop)
 
     stream.run() # this is blocking
+
+    raise Exception("stream run finished! control flow is not supposed to get here!")
 
 def work(logging_queue, order_pipe, readers, ticker, investable_qty):
     try:
