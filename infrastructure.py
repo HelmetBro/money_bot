@@ -120,7 +120,7 @@ async def bars_callback(b):
 
 async def updates_callback(u):
     for stream in updates_stream:
-        if stream['ticker'] == u['order'].symbol:
+        if stream['ticker'] == u.order['symbol']:
             stream['writer'].send(u)
 
 def main():

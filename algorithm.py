@@ -35,18 +35,10 @@ class algorithm(listener.listener):
 	## trades-related watcher thread ##
 
 	def on_trades(self):
-		# storing and appending to a list is much faster than a df. concating a df is fast.
-		self.trades_update_lock.acquire()
-		self.trades_data_lock.acquire()
-
-		self.live_trades_data_pd.loc[len(self.live_trades_data_pd)] = self.trades_data
-
+		self.live_trades_data_pd.loc[len(self.live_trades_data_pd)] = self.trades_queue.get()
 		if len(self.live_trades_data_pd) >= self.MAX_DATA_SIZE:
 			self.live_trades_data_pd = numpy.array_split(self.live_trades_data_pd, 2)[1]
 			self.live_trades_data_pd.reset_index(drop=True, inplace=True)
-
-
-		self.trades_data_lock.release()
 
 	def on_trades_get(self, period):
 		self.on_trades()
@@ -55,18 +47,10 @@ class algorithm(listener.listener):
 	## quotes-related watcher thread ##
 
 	def on_quotes(self):
-		# storing and appending to a list is much faster than a df. concating a df is fast.
-		self.quotes_update_lock.acquire()
-		self.quotes_data_lock.acquire()
-
-		self.live_quotes_data_pd.loc[len(self.live_quotes_data_pd)] = self.quotes_data
-
+		self.live_quotes_data_pd.loc[len(self.live_quotes_data_pd)] = self.quotes_queue.get()
 		if len(self.live_quotes_data_pd) >= self.MAX_DATA_SIZE:
 			self.live_quotes_data_pd = numpy.array_split(self.live_quotes_data_pd, 2)[1]
 			self.live_quotes_data_pd.reset_index(drop=True, inplace=True)
-
-
-		self.quotes_data_lock.release()
 
 	def on_quotes_get(self, period):
 		self.on_quotes()
@@ -75,17 +59,10 @@ class algorithm(listener.listener):
 	## bars-related watcher thread ##
 
 	def on_bars(self):
-		# storing and appending to a list is much faster than a df. concating a df is fast.
-		self.bars_update_lock.acquire()
-		self.bars_data_lock.acquire()
-
-		self.live_bars_data_pd.loc[len(self.live_bars_data_pd)] = self.bars_data
-
+		self.live_bars_data_pd.loc[len(self.live_bars_data_pd)] = self.bars_queue.get()
 		if len(self.live_bars_data_pd) >= self.MAX_DATA_SIZE:
 			self.live_bars_data_pd = numpy.array_split(self.live_bars_data_pd, 2)[1]
 			self.live_bars_data_pd.reset_index(drop=True, inplace=True)
-
-		self.bars_data_lock.release()
 
 	def on_bars_get(self, period):
 		self.on_bars()
@@ -94,17 +71,10 @@ class algorithm(listener.listener):
 	## updates-related watcher thread ##
 
 	def on_updates(self):
-		# storing and appending to a list is much faster than a df. concating a df is fast.
-		self.updates_update_lock.acquire()
-		self.updates_data_lock.acquire()
-
-		self.live_updates_data.append(self.updates_data)
-
+		self.live_updates_data.append(self.updates_queue.get())
 		if len(self.live_updates_data) >= self.MAX_DATA_SIZE:
 			self.live_updates_data = numpy.array_split(self.live_updates_data, 2)[1]
 			self.live_updates_data.reset_index(drop=True, inplace=True)
-
-		self.updates_data_lock.release()
 
 	def on_updates_get(self, period):
 		self.on_updates()

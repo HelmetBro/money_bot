@@ -1,26 +1,11 @@
 import threading
+import queue
 
 class listener:
-	trades_data_lock  = threading.Lock()
-	quotes_data_lock  = threading.Lock()
-	updates_data_lock = threading.Lock()
-	bars_data_lock    = threading.Lock()
-
-	trades_update_lock  = threading.Lock()
-	quotes_update_lock  = threading.Lock()
-	updates_update_lock = threading.Lock()
-	bars_update_lock    = threading.Lock()
-
-	# these must be acquired to prevent updates with no new data on start
-	trades_update_lock.acquire()
-	quotes_update_lock.acquire()
-	updates_update_lock.acquire()
-	bars_update_lock.acquire()
-
-	trades_data  = None # this should only be edited by one sub-thread
-	quotes_data  = None # this should only be edited by one sub-thread
-	updates_data = None # this should only be edited by one sub-thread
-	bars_data    = None # this should only be edited by one sub-thread
+	trades_queue  = queue.LifoQueue()
+	quotes_queue  = queue.LifoQueue()
+	updates_queue = queue.LifoQueue()
+	bars_queue    = queue.LifoQueue()
 
 	def __init__(self, readers):
 		# make request(s) to get account data when created first before doing the below W.I.P.
@@ -31,44 +16,16 @@ class listener:
 
 	def trades_listener(self, listener):
 		while True:
-			temp_data = listener.recv()
-			self.trades_data_lock.acquire()
-			self.trades_data = temp_data
-			try:
-				self.trades_update_lock.release()
-			except:
-				pass
-			self.trades_data_lock.release()
+			self.trades_queue.put(listener.recv())
 
 	def quotes_listener(self, listener):
 		while True:
-			temp_data = listener.recv()
-			self.quotes_data_lock.acquire()
-			self.quotes_data = temp_data
-			try:
-				self.quotes_update_lock.release()
-			except:
-				pass
-			self.quotes_data_lock.release()
+			self.quotes_queue.put(listener.recv())
 
 	def bars_listener(self, listener):
 		while True:
-			temp_data = listener.recv()
-			self.bars_data_lock.acquire()
-			self.bars_data = temp_data
-			try:
-				self.bars_update_lock.release()
-			except:
-				pass
-			self.bars_data_lock.release()
+			self.bars_queue.put(listener.recv())
 
 	def updates_listener(self, listener):
 		while True:
-			temp_data = listener.recv()
-			self.updates_data_lock.acquire()
-			self.updates_data = temp_data
-			try:
-				self.updates_update_lock.release()
-			except:
-				pass
-			self.updates_data_lock.release()
+			self.updates_queue.put(listener.recv())
