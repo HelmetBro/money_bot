@@ -11,10 +11,10 @@ class macd_rsi(algorithm.algorithm):
 	long_period_macd  = 6 # past 26 mintues
 	short_period_macd = 3 # past 12 mintues
 	period_rsi        = 5 # past 14 mintues
-	signal_ema_period = 2  # past 9 mintues
+	signal_ema_period = 2 # past 9 mintues
 
-	rsi_upper_bound = 60#66.66
-	rsi_lower_bound = 40#33.33
+	rsi_upper_bound = 60 # 66.66 - this is aggressive. 70 is standard
+	rsi_lower_bound = 40 # 33.33 - this is aggressive. 30 is standard
 
 	def __init__(self, ticker, order_pipe, readers, investable_qty):
 		super().__init__(order_pipe, readers)
@@ -36,7 +36,7 @@ class macd_rsi(algorithm.algorithm):
 
 				if update.side == 'sell':
 					self.investable_qty += update.filled_qty
-					if (self.qty == 0):
+					if (self.investable_qty == 0):
 						raise Exception("{} investable_qty is 0 after sell order!".format(self.ticker))
 
 	def run(self):
@@ -63,17 +63,17 @@ class macd_rsi(algorithm.algorithm):
 		# buy as much as possible
 		if self.investable_qty >= 0 and macd_signal_result > 0 and rsi_result < self.rsi_lower_bound:
 			logger.logp("{} -> macd_signal: {}, rsi: {} buying!".format(
-			self.ticker, macd_signal_result, rsi_result), 'debug')
+					    self.ticker, macd_signal_result, rsi_result))
 			transaction.market_buy_qty(self.order_pipe, self.ticker, self.investable_qty)
 
 		# liquidate entire position
 		elif self.investable_qty == 0 and macd_signal_result < 0 and rsi_result > self.rsi_upper_bound:
 			logger.logp("qty", self.investable_qty)
 			logger.logp("{} -> macd_signal: {}, rsi: {} liquidating!".format(
-			self.ticker, macd_signal_result, rsi_result), 'debug')
+						self.ticker, macd_signal_result, rsi_result))
 			transaction.market_liquidate(self.order_pipe, self.ticker)
 
 		# if undesireable, don't make a transaction
 		else:
 			logger.logp("{} -> macd_signal: {}, rsi: {} no trade signal thrown".format(
-			self.ticker, macd_signal_result, rsi_result), 'debug')
+						self.ticker, macd_signal_result, rsi_result))

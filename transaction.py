@@ -38,7 +38,6 @@ class transaction:
 
 		# negative qty? liquidate asset.
 		if self.transaction_type == 'quantity' and self.value < 0:
-			"liquidating asset: {}".format(self.ticker)
 			logger.logp("liquidating asset: {}".format(self.ticker))
 			return api.close_position(self.ticker)
 
@@ -61,9 +60,11 @@ class transaction:
 				time_in_force = self.time_in_force)
 
 		else:
-			logger.logp('FATAL ERROR! incorrect transaction type')
+			error = "FATAL ERROR! incorrect transaction type"
+			logger.logp(error)
+			raise Exception(error)
 
-		logger.log(self.get_info())
+		logger.logp(self.get_info())
 		return order
 
 	def get_info(self):

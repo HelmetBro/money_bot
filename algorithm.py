@@ -74,7 +74,6 @@ class algorithm(listener.listener):
 		self.live_updates_data.append(self.updates_queue.get())
 		if len(self.live_updates_data) >= self.MAX_DATA_SIZE:
 			self.live_updates_data = numpy.array_split(self.live_updates_data, 2)[1]
-			self.live_updates_data.reset_index(drop=True, inplace=True)
 
 	def on_updates_get(self, period):
 		self.on_updates()
