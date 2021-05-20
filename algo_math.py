@@ -29,35 +29,35 @@
 #     return history_df['c'].std()
 
 def macd_with_signal(long_data, short_data, ema_period):
-    # calculate long-term EWM
-    long_ema = long_data.ewm(len(long_data.index), adjust=False).mean().iloc[-1]
+	# calculate long-term EWM
+	long_ema = long_data.ewm(len(long_data.index), adjust=False).mean().iloc[-1]
 
-    # calculate short-term EWM
-    short_ema = short_data.ewm(len(short_data.index), adjust=False).mean().iloc[-1]
+	# calculate short-term EWM
+	short_ema = short_data.ewm(len(short_data.index), adjust=False).mean().iloc[-1]
 
-    # macd line. this is to be compared to signal line
-    macd = short_ema - long_ema
+	# macd line. this is to be compared to signal line
+	macd = short_ema - long_ema
 
-    # this calculates our signal line
-    signal = macd.ewm(span=ema_period, adjust=False).mean()
+	# this calculates our signal line
+	signal = macd.ewm(span=ema_period, adjust=False).mean()
 
-    return macd - signal
+	return macd - signal
 
 def rsi(data):
-    rsi_period = len(data.index) - 1
-    # grab our ticker prices and grab only the deltas
-    delta = data.diff()
-    up,down = delta.copy(),delta.copy()
+	rsi_period = len(data.index) - 1
+	# grab our ticker prices and grab only the deltas
+	delta = data.diff()
+	up,down = delta.copy(),delta.copy()
 
-    # ignore all values unimportant to our delta direction
-    up[up < 0] = 0
-    down[down > 0] = 0
+	# ignore all values unimportant to our delta direction
+	up[up < 0] = 0
+	down[down > 0] = 0
 
-    # calculate the rolling means, and divide
-    rolling_up = up.rolling(rsi_period).mean()
-    rolling_down = down.rolling(rsi_period).mean().abs()
+	# calculate the rolling means, and divide
+	rolling_up = up.rolling(rsi_period).mean()
+	rolling_down = down.rolling(rsi_period).mean().abs()
 
-    # and finally, get our rsi
-    rs = rolling_up / rolling_down
-    rsi = 100.0 - (100.0 / (1.0 + rs))
-    return rsi.iloc[-1]
+	# and finally, get our rsi
+	rs = rolling_up / rolling_down
+	rsi = 100.0 - (100.0 / (1.0 + rs))
+	return rsi.iloc[-1]

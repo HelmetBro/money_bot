@@ -3,6 +3,7 @@ import logger
 import transaction
 import algo_math
 import threading
+import traceback
 
 class macd_rsi(algorithm.algorithm):
 	ticker = None
@@ -23,21 +24,25 @@ class macd_rsi(algorithm.algorithm):
 		threading.Thread(target=self.update_qty, args=(), daemon=True).start()
 
 	def update_qty(self):
-		while True:
-			# get latest update
-			update = super().on_updates_get(1)
+		try:
+			while True:
+				# get latest update
+				update = super().on_updates_get(1)
 
-			if update.event == 'fill':
+				if update.event == 'fill':
 
-				if update.side == 'buy':
-					self.investable_qty -= update.filled_qty
-					if (self.investable_qty != 0):
-						raise Exception("{} investable_qty isn't 0 after buy order!".format(self.ticker))
+					if update.side == 'buy':
+						self.investable_qty -= update.filled_qty
+						if (self.investable_qty != 0):
+							raise Exception("{} investable_qty isn't 0 after buy order!".format(self.ticker))
 
-				if update.side == 'sell':
-					self.investable_qty += update.filled_qty
-					if (self.investable_qty == 0):
-						raise Exception("{} investable_qty is 0 after sell order!".format(self.ticker))
+					if update.side == 'sell':
+						self.investable_qty += update.filled_qty
+						if (self.investable_qty == 0):
+							raise Exception("{} investable_qty is 0 after sell order!".format(self.ticker))
+		except Exception as e:
+			traceback.print_exc()
+			logger.logp(e)
 
 	def run(self):
 		while True:

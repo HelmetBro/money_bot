@@ -71,173 +71,173 @@ updates_stream = []
 # b8 = {'T': 'b', 'S': 'AAPL', 'o': 133.37, 'h': 133.39, 'l': 133.37, 'c': 133.38, 'v': 895}
 
 tsla_bars = [
-    {'T': 'b', 'S': 'TSLA', 'o': 5, 'h': 672.94, 'l': 672.61, 'c': 5.23, 'v': 729},
-    {'T': 'b', 'S': 'TSLA', 'o': 5, 'h': 672.94, 'l': 672.61, 'c': 7.51, 'v': 729},
-    {'T': 'b', 'S': 'TSLA', 'o': 5, 'h': 672.94, 'l': 672.61, 'c': 5.85, 'v': 729},
-    {'T': 'b', 'S': 'TSLA', 'o': 5, 'h': 672.94, 'l': 672.61, 'c': 3.91, 'v': 729},
-    {'T': 'b', 'S': 'TSLA', 'o': 5, 'h': 672.94, 'l': 672.61, 'c': 5.96, 'v': 729},
-    {'T': 'b', 'S': 'TSLA', 'o': 5, 'h': 672.94, 'l': 672.61, 'c': 9.75, 'v': 729},
-    {'T': 'b', 'S': 'TSLA', 'o': 5, 'h': 672.94, 'l': 672.61, 'c': 5.95, 'v': 729},
-    {'T': 'b', 'S': 'TSLA', 'o': 5, 'h': 672.94, 'l': 672.61, 'c': 1.19, 'v': 729},
-    {'T': 'b', 'S': 'TSLA', 'o': 5, 'h': 672.94, 'l': 672.61, 'c': 4.10, 'v': 729},
-    {'T': 'b', 'S': 'TSLA', 'o': 5, 'h': 672.94, 'l': 672.61, 'c': 5.32, 'v': 729},
-    {'T': 'b', 'S': 'TSLA', 'o': 5, 'h': 672.94, 'l': 672.61, 'c': 6.63, 'v': 729},
-    {'T': 'b', 'S': 'TSLA', 'o': 5, 'h': 672.94, 'l': 672.61, 'c': 5.85, 'v': 729},
-    {'T': 'b', 'S': 'TSLA', 'o': 5, 'h': 672.94, 'l': 672.61, 'c': 4.94, 'v': 729},
-    {'T': 'b', 'S': 'TSLA', 'o': 5, 'h': 672.94, 'l': 672.61, 'c': 2.94, 'v': 729},
-    {'T': 'b', 'S': 'TSLA', 'o': 5, 'h': 672.94, 'l': 672.61, 'c': 4.01, 'v': 729},
-    {'T': 'b', 'S': 'TSLA', 'o': 5, 'h': 672.94, 'l': 672.61, 'c': 6.94, 'v': 729},
-    {'T': 'b', 'S': 'TSLA', 'o': 4, 'h': 672.94, 'l': 672.61, 'c': 9.18, 'v': 729},
-    {'T': 'b', 'S': 'TSLA', 'o': 4, 'h': 672.94, 'l': 672.61, 'c': 6.56, 'v': 729},
-    {'T': 'b', 'S': 'TSLA', 'o': 4, 'h': 672.94, 'l': 672.61, 'c': 1.23, 'v': 729},
-    {'T': 'b', 'S': 'TSLA', 'o': 4, 'h': 672.94, 'l': 672.61, 'c': 4.42, 'v': 729},
-    {'T': 'b', 'S': 'TSLA', 'o': 3, 'h': 672.94, 'l': 672.61, 'c': 3.45, 'v': 729},
-    {'T': 'b', 'S': 'TSLA', 'o': 3, 'h': 672.94, 'l': 672.61, 'c': 10.95, 'v': 729},
-    {'T': 'b', 'S': 'TSLA', 'o': 3, 'h': 672.94, 'l': 672.61, 'c': 30.11, 'v': 729},
-    {'T': 'b', 'S': 'TSLA', 'o': 30, 'h': 672.94, 'l': 672.61, 'c': 70.54, 'v': 729},
-    {'T': 'b', 'S': 'TSLA', 'o': 70, 'h': 672.94, 'l': 672.61, 'c': 60.23, 'v': 729},
-    {'T': 'b', 'S': 'TSLA', 'o': 70, 'h': 672.94, 'l': 672.61, 'c': 70.77, 'v': 729},
-    {'T': 'b', 'S': 'TSLA', 'o': 70, 'h': 672.94, 'l': 672.61, 'c': 80.01, 'v': 729},
-    {'T': 'b', 'S': 'TSLA', 'o': 80, 'h': 672.94, 'l': 672.61, 'c': 90.74, 'v': 729},
-    {'T': 'b', 'S': 'TSLA', 'o': 90, 'h': 672.94, 'l': 672.61, 'c': 100.47, 'v': 729},
-    {'T': 'b', 'S': 'TSLA', 'o': 100, 'h': 672.94, 'l': 672.61, 'c': 500.11, 'v': 729},
+	{'T': 'b', 'S': 'TSLA', 'o': 5, 'h': 672.94, 'l': 672.61, 'c': 5.23, 'v': 729},
+	{'T': 'b', 'S': 'TSLA', 'o': 5, 'h': 672.94, 'l': 672.61, 'c': 7.51, 'v': 729},
+	{'T': 'b', 'S': 'TSLA', 'o': 5, 'h': 672.94, 'l': 672.61, 'c': 5.85, 'v': 729},
+	{'T': 'b', 'S': 'TSLA', 'o': 5, 'h': 672.94, 'l': 672.61, 'c': 3.91, 'v': 729},
+	{'T': 'b', 'S': 'TSLA', 'o': 5, 'h': 672.94, 'l': 672.61, 'c': 5.96, 'v': 729},
+	{'T': 'b', 'S': 'TSLA', 'o': 5, 'h': 672.94, 'l': 672.61, 'c': 9.75, 'v': 729},
+	{'T': 'b', 'S': 'TSLA', 'o': 5, 'h': 672.94, 'l': 672.61, 'c': 5.95, 'v': 729},
+	{'T': 'b', 'S': 'TSLA', 'o': 5, 'h': 672.94, 'l': 672.61, 'c': 1.19, 'v': 729},
+	{'T': 'b', 'S': 'TSLA', 'o': 5, 'h': 672.94, 'l': 672.61, 'c': 4.10, 'v': 729},
+	{'T': 'b', 'S': 'TSLA', 'o': 5, 'h': 672.94, 'l': 672.61, 'c': 5.32, 'v': 729},
+	{'T': 'b', 'S': 'TSLA', 'o': 5, 'h': 672.94, 'l': 672.61, 'c': 6.63, 'v': 729},
+	{'T': 'b', 'S': 'TSLA', 'o': 5, 'h': 672.94, 'l': 672.61, 'c': 5.85, 'v': 729},
+	{'T': 'b', 'S': 'TSLA', 'o': 5, 'h': 672.94, 'l': 672.61, 'c': 4.94, 'v': 729},
+	{'T': 'b', 'S': 'TSLA', 'o': 5, 'h': 672.94, 'l': 672.61, 'c': 2.94, 'v': 729},
+	{'T': 'b', 'S': 'TSLA', 'o': 5, 'h': 672.94, 'l': 672.61, 'c': 4.01, 'v': 729},
+	{'T': 'b', 'S': 'TSLA', 'o': 5, 'h': 672.94, 'l': 672.61, 'c': 6.94, 'v': 729},
+	{'T': 'b', 'S': 'TSLA', 'o': 4, 'h': 672.94, 'l': 672.61, 'c': 9.18, 'v': 729},
+	{'T': 'b', 'S': 'TSLA', 'o': 4, 'h': 672.94, 'l': 672.61, 'c': 6.56, 'v': 729},
+	{'T': 'b', 'S': 'TSLA', 'o': 4, 'h': 672.94, 'l': 672.61, 'c': 1.23, 'v': 729},
+	{'T': 'b', 'S': 'TSLA', 'o': 4, 'h': 672.94, 'l': 672.61, 'c': 4.42, 'v': 729},
+	{'T': 'b', 'S': 'TSLA', 'o': 3, 'h': 672.94, 'l': 672.61, 'c': 3.45, 'v': 729},
+	{'T': 'b', 'S': 'TSLA', 'o': 3, 'h': 672.94, 'l': 672.61, 'c': 10.95, 'v': 729},
+	{'T': 'b', 'S': 'TSLA', 'o': 3, 'h': 672.94, 'l': 672.61, 'c': 30.11, 'v': 729},
+	{'T': 'b', 'S': 'TSLA', 'o': 30, 'h': 672.94, 'l': 672.61, 'c': 70.54, 'v': 729},
+	{'T': 'b', 'S': 'TSLA', 'o': 70, 'h': 672.94, 'l': 672.61, 'c': 60.23, 'v': 729},
+	{'T': 'b', 'S': 'TSLA', 'o': 70, 'h': 672.94, 'l': 672.61, 'c': 70.77, 'v': 729},
+	{'T': 'b', 'S': 'TSLA', 'o': 70, 'h': 672.94, 'l': 672.61, 'c': 80.01, 'v': 729},
+	{'T': 'b', 'S': 'TSLA', 'o': 80, 'h': 672.94, 'l': 672.61, 'c': 90.74, 'v': 729},
+	{'T': 'b', 'S': 'TSLA', 'o': 90, 'h': 672.94, 'l': 672.61, 'c': 100.47, 'v': 729},
+	{'T': 'b', 'S': 'TSLA', 'o': 100, 'h': 672.94, 'l': 672.61, 'c': 500.11, 'v': 729},
 ]
 
 async def trade_callback(t):
-    for stream in trade_stream:
-        if stream['ticker'] == t['S']:
-            stream['writer'].send(t)
+	for stream in trade_stream:
+		if stream['ticker'] == t['S']:
+			stream['writer'].send(t)
 
 async def quote_callback(q):
-    for stream in quote_stream:
-        if stream['ticker'] == q['S']:
-            stream['writer'].send(q)
+	for stream in quote_stream:
+		if stream['ticker'] == q['S']:
+			stream['writer'].send(q)
 
 async def bars_callback(b):
-    for stream in bars_stream:
-        if stream['ticker'] == b['S']:
-            stream['writer'].send(b)
+	for stream in bars_stream:
+		if stream['ticker'] == b['S']:
+			stream['writer'].send(b)
 
 async def updates_callback(u):
-    for stream in updates_stream:
-        if stream['ticker'] == u.order['symbol']:
-            stream['writer'].send(u)
+	for stream in updates_stream:
+		if stream['ticker'] == u.order['symbol']:
+			stream['writer'].send(u)
 
 def main():
-    # check all tickers to ensure they're supported by Alpaca
-    for ticker in tickers:
-        try:
-            asset = api.get_asset(ticker)
-            if asset.tradable == False:
-                print("{} is within Alpaca, but not tradeable!".format(ticker))
-                return
-        except:
-            print("{} is not Alpaca-compliant!".format(ticker))
-            return
+	# check all tickers to ensure they're supported by Alpaca
+	for ticker in tickers:
+		try:
+			asset = api.get_asset(ticker)
+			if asset.tradable == False:
+				print("{} is within Alpaca, but not tradeable!".format(ticker))
+				return
+		except:
+			print("{} is not Alpaca-compliant!".format(ticker))
+			return
 
-    # ensuring our account setup is okay
-    account = api.get_account()
-    print ("account status: ", account.status)
+	# ensuring our account setup is okay
+	account = api.get_account()
+	print ("account status: ", account.status)
 
-    # add current tickers to our tickers list, and get current invested positions
-    positions = account_setup.add_current_tickers(api, tickers)
+	# add current tickers to our tickers list, and get current invested positions
+	positions = account_setup.add_current_tickers(api, tickers)
 
-    # starting our main process
-    start_loop(positions, float(account.cash))
+	# starting our main process
+	start_loop(positions, float(account.cash))
 
 def start_loop(positions, cash):
-    logging_queue = logger.main_setup()
-    logger.logp("starting main loop")
+	logging_queue = logger.main_setup()
+	logger.logp("starting main loop")
 
-    parent_order_pipe, child_order_pipe = multiprocessing.Pipe()
+	parent_order_pipe, child_order_pipe = multiprocessing.Pipe()
 
-    # populate processes list with an instance per ticker
-    for ticker in tickers:
+	# populate processes list with an instance per ticker
+	for ticker in tickers:
 
-        # setting up our streams
-        global trade_stream
-        global quote_stream
-        global bars_stream
-        global updates_stream
-        trade_reader, trade_writer     = multiprocessing.Pipe()
-        quote_reader, quote_writer     = multiprocessing.Pipe()
-        bar_reader, bar_writer         = multiprocessing.Pipe()
-        update_reader, update_writer   = multiprocessing.Pipe()
-        trade_stream.append(  {'ticker': ticker, 'writer': trade_writer})
-        quote_stream.append(  {'ticker': ticker, 'writer': quote_writer})
-        bars_stream.append(   {'ticker': ticker, 'writer': bar_writer})
-        updates_stream.append({'ticker': ticker, 'writer': update_writer})
+		# setting up our streams
+		global trade_stream
+		global quote_stream
+		global bars_stream
+		global updates_stream
+		trade_reader, trade_writer     = multiprocessing.Pipe()
+		quote_reader, quote_writer     = multiprocessing.Pipe()
+		bar_reader, bar_writer         = multiprocessing.Pipe()
+		update_reader, update_writer   = multiprocessing.Pipe()
+		trade_stream.append(  {'ticker': ticker, 'writer': trade_writer})
+		quote_stream.append(  {'ticker': ticker, 'writer': quote_writer})
+		bars_stream.append(   {'ticker': ticker, 'writer': bar_writer})
+		updates_stream.append({'ticker': ticker, 'writer': update_writer})
 
-        readers = [trade_reader, quote_reader, bar_reader, update_reader];
+		readers = [trade_reader, quote_reader, bar_reader, update_reader];
 
-        # calculate how much cash each ticker gets to invest (0 if there's already an active position)
-        # from that, get the number of shares able to be bought. -0.05 to ensure order goes through
-        investable_cash = account_setup.calc_investable_cash(cash, ticker, tickers, positions)
-        investable_qty = int(investable_cash / (api.get_last_trade(ticker).price - 0.05))
+		# calculate how much cash each ticker gets to invest (0 if there's already an active position)
+		# from that, get the number of shares able to be bought. -0.05 to ensure order goes through
+		investable_cash = account_setup.calc_investable_cash(cash, ticker, tickers, positions)
+		investable_qty = int(investable_cash / (api.get_last_trade(ticker).price - 0.05))
 
-        # creating processes for each ticker
-        process = multiprocessing.Process(target=work, args=(
-            logging_queue,
-            child_order_pipe,
-            readers,
-            ticker,
-            investable_qty))
-        child_processes.append(process)
+		# creating processes for each ticker
+		process = multiprocessing.Process(target=work, args=(
+			logging_queue,
+			child_order_pipe,
+			readers,
+			ticker,
+			investable_qty))
+		child_processes.append(process)
 
-        #subscribing to each ticker
-        stream.subscribe_trades(trade_callback, ticker)
-        stream.subscribe_quotes(quote_callback, ticker)
-        stream.subscribe_bars(bars_callback, ticker)
+		#subscribing to each ticker
+		stream.subscribe_trades(trade_callback, ticker)
+		stream.subscribe_quotes(quote_callback, ticker)
+		stream.subscribe_bars(bars_callback, ticker)
 
-    stream.subscribe_trade_updates(updates_callback)
+	stream.subscribe_trade_updates(updates_callback)
 
-    # thread to initiate logging to run in a background thread on main process
-    logger_thread = threading.Thread(target=logger.listen, daemon=True)
-    logger_thread.start()
+	# thread to initiate logging to run in a background thread on main process
+	logger_thread = threading.Thread(target=logger.listen, daemon=True)
+	logger_thread.start()
 
-    # thread to handle api requests from Alpaca, and feed children
-    api_thread = threading.Thread(target=transaction.listen, args=(parent_order_pipe, api,), daemon=True)
-    api_thread.start()
+	# thread to handle api requests from Alpaca, and feed children
+	api_thread = threading.Thread(target=transaction.listen, args=(parent_order_pipe, api,), daemon=True)
+	api_thread.start()
 
-    for process in child_processes:
-        process.start()
+	for process in child_processes:
+		process.start()
 
-    # while BACKTRADING:
-    if BACKTRADING:
-        time.sleep(1)
-        old_loop = asyncio.get_event_loop()
-        new_loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(new_loop)
-        while True:
-            for x in range(30):
-                time.sleep(0.1)
-                asyncio.run(bars_callback(copy.deepcopy(tsla_bars[x])))
-        asyncio.set_event_loop(old_loop)
+	# while BACKTRADING:
+	if BACKTRADING:
+		time.sleep(1)
+		old_loop = asyncio.get_event_loop()
+		new_loop = asyncio.new_event_loop()
+		asyncio.set_event_loop(new_loop)
+		while True:
+			for x in range(30):
+				time.sleep(0.1)
+				asyncio.run(bars_callback(copy.deepcopy(tsla_bars[x])))
+		asyncio.set_event_loop(old_loop)
 
-    stream.run() # this is blocking
+	stream.run() # this is blocking
 
-    raise Exception("stream run finished! control flow is not supposed to get here!")
+	raise Exception("stream run returned! control flow is not supposed to get here!")
 
 def work(logging_queue, order_pipe, readers, ticker, investable_qty):
-    try:
-        # setting up logging/signals
-        signal(SIGINT, SIG_IGN) # ignore all interupts on sub processes
-        logger.process_setup(logging_queue)
-        logger.logp("subprocess for {} started".format(ticker))
+	try:
+		# setting up logging/signals
+		signal(SIGINT, SIG_IGN) # ignore all interupts on sub processes
+		logger.process_setup(logging_queue)
+		logger.logp("subprocess for {} started".format(ticker))
 
-        # choose our algorithm can put any here
-        algorithm = macd_rsi(ticker,
-                            order_pipe,
-                            readers,
-                            investable_qty)
+		# choose our algorithm can put any here
+		algorithm = macd_rsi(ticker,
+							order_pipe,
+							readers,
+							investable_qty)
 
-        algorithm.run()
-    except FunctionTimedOut as e:
-        logger.log("PID: {} TICKER: {} timed out! TIMEOUT = {}, retrying on next activation".format(os.getpid(), ticker, TIMEOUT), 'error')
-    except Exception as e:
-        logger.log("PID: {} TICKER: {} caught error!".format(os.getpid(), ticker), 'critical')
-        logger.logp(e, 'critical')
-        logger.log(e.__traceback__)
-        traceback.print_exc()
-    except:
-        logger.logp("special error was thrown", 'critical')
+		algorithm.run()
+	except FunctionTimedOut as e:
+		# implement the retry sometime
+		logger.log("PID: {} TICKER: {} timed out! TIMEOUT = {}, retrying on next activation".format(os.getpid(), ticker, TIMEOUT), 'error')
+	except Exception as e:
+		logger.logp("PID: {} TICKER: {} caught error!".format(os.getpid(), ticker), 'critical')
+		logger.logp(e, 'critical')
+		traceback.print_exc()
+	except:
+		logger.logp("special error was thrown", 'critical')

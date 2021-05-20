@@ -32,16 +32,16 @@
 #     return int(cash / (num_current_positions + num_current_positions))
 
 def add_current_tickers(api, tickers):
-    positions = api.list_positions()
-    for pos in positions:
-        if pos.symbol not in tickers:
-            tickers.append(pos.symbol)
-    return positions
+	positions = api.list_positions()
+	for pos in positions:
+		if pos.symbol not in tickers:
+			tickers.append(pos.symbol)
+	return positions
 
 def calc_investable_cash(cash, ticker, tickers, positions):
-    for pos in positions:
-        if ticker == pos.symbol:
-            return 0
+	for pos in positions:
+		if ticker == pos.symbol:
+			return 0
 
-    num_new_positions = len(tickers) - len(positions)
-    return int(cash / num_new_positions)
+	num_new_positions = len(tickers) - len(positions)
+	return int(cash / num_new_positions)
