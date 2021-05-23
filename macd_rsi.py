@@ -40,6 +40,7 @@ class macd_rsi(algorithm.algorithm):
 						self.investable_qty += update.filled_qty
 						if (self.investable_qty == 0):
 							raise Exception("{} investable_qty is 0 after sell order!".format(self.ticker))
+
 		except Exception as e:
 			traceback.print_exc()
 			logger.logp(e)

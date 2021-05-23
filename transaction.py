@@ -1,4 +1,5 @@
 import logger
+import alpaca_trade_api
 from run import BACKTRADING as BACKTRADING
 
 TIMEOUT = 9
@@ -36,39 +37,51 @@ class transaction:
 	# only to be called by main processes sub-thread, listen()
 	def submit(self, api):
 
-		# negative qty? liquidate asset.
-		if self.transaction_type == 'quantity' and self.value < 0:
+		# negative value? liquidate asset.
+		if self.value < 0:
 			logger.logp("liquidating asset: {}".format(self.ticker))
-			return api.close_position(self.ticker)
+			try:
+				order = api.close_position(self.ticker)
+			except alpaca_trade_api.rest.APIError:
+				logger.logp("position did not exist!")
+			except Exception as e:
+				logger.logp(e)
+			return order
 
 		# otherwise just submit a regular order
+		logger.logp(self.get_info())
 
 		if self.transaction_type == 'notional':
-			order = api.submit_order(
-				symbol 	      = self.ticker,
-				side   	      = self.side,
-				type   	      = self.order_type,
-				notional      = self.value,
-				time_in_force = self.time_in_force)
+			try:
+				order = api.submit_order(
+					symbol 	      = self.ticker,
+					side   	      = self.side,
+					type   	      = self.order_type,
+					notional      = self.value,
+					time_in_force = self.time_in_force)
+			except Exception as e:
+				logger.logp(e)
 
 		elif self.transaction_type == 'quantity':
-			order = api.submit_order(
-				symbol 	      = self.ticker,
-				side   	      = self.side,
-				type   	      = self.order_type,
-				qty    	      = self.value,
-				time_in_force = self.time_in_force)
+			try:
+				order = api.submit_order(
+					symbol 	      = self.ticker,
+					side   	      = self.side,
+					type   	      = self.order_type,
+					qty    	      = self.value,
+					time_in_force = self.time_in_force)
+			except Exception as e:
+				logger.logp(e)
 
 		else:
 			error = "FATAL ERROR! incorrect transaction type"
 			logger.logp(error)
 			raise Exception(error)
 
-		logger.logp(self.get_info())
 		return order
 
 	def get_info(self):
-		return "submitted order: ticker [{}] transaction type [{}] side [{}] order type [{}] value [{}] tif [{}]".format(
+		return "submitting order: ticker [{}] transaction type [{}] side [{}] order type [{}] value [{}] tif [{}]".format(
 					self.ticker,
 					self.transaction_type,
 					self.side,

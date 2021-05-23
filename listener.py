@@ -19,7 +19,8 @@ class listener:
 	def trades_listener(self, listener):
 		try:
 			while True:
-				self.trades_queue.put(listener.recv())
+				data = listener.recv()
+				self.trades_queue.put(data)
 		except Exception as e:
 			traceback.print_exc()
 			logger.logp(e)
@@ -27,7 +28,8 @@ class listener:
 	def quotes_listener(self, listener):
 		try:
 			while True:
-				self.quotes_queue.put(listener.recv())
+				data = listener.recv()
+				self.quotes_queue.put(data)
 		except Exception as e:
 			traceback.print_exc()
 			logger.logp(e)
@@ -35,7 +37,8 @@ class listener:
 	def bars_listener(self, listener):
 		try:
 			while True:
-				self.bars_queue.put(listener.recv())
+				data = listener.recv()
+				self.bars_queue.put(data)
 		except Exception as e:
 			traceback.print_exc()
 			logger.logp(e)
@@ -43,7 +46,8 @@ class listener:
 	def updates_listener(self, listener):
 		try:
 			while True:
-				self.updates_queue.put(listener.recv())
+				data = listener.recv()
+				self.updates_queue.put(data)
 		except Exception as e:
 			traceback.print_exc()
 			logger.logp(e)

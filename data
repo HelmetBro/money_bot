@@ -642,3 +642,116 @@ Traceback (most recent call last):
     if key in self._raw:
   [Previous line repeated 991 more times]
 RecursionError: maximum recursion depth exceeded
+
+
+
+
+
+
+https://stackoverflow.com/questions/54101923/1006-connection-closed-abnormally-error-with-python-3-7-websockets
+
+2021-05-20 10:43:44,833 | subscribed to trades: ['MSFT', 'TSLA', 'QQQ', 'SPY', 'AAPL'], quotes: ['TSLA', 'QQQ', 'AAPL', 'MSFT', 'SPY'] and bars: ['AAPL', 'QQQ', 'SPY', 'MSFT', 'TSLA']
+2021-05-20 12:57:35,870 | websocket error, restarting connection: code = 1006 (connection closed abnormally [internal]), no reason
+
+
+
+
+
+
+
+
+
+AAPL -> macd_signal: -0.008126373848864117, rsi: 54.5454545454569 no trade signal thrown
+submitted order: ticker [MSFT] transaction type [quantity] side [buy] order type [market] value [80] tif [fok]
+Traceback (most recent call last):
+  File "/home/pi/stock_bot_alpaca/listener.py", line 46, in updates_listener
+    self.updates_queue.put(listener.recv())
+  File "/usr/local/lib/python3.9/multiprocessing/connection.py", line 256, in recv
+    return _ForkingPickler.loads(buf.getbuffer())
+  File "/home/pi/.local/lib/python3.9/site-packages/alpaca_trade_api/entity.py", line 19, in __getattr__
+    if key in self._raw:
+  File "/home/pi/.local/lib/python3.9/site-packages/alpaca_trade_api/entity.py", line 19, in __getattr__
+    if key in self._raw:
+  File "/home/pi/.local/lib/python3.9/site-packages/alpaca_trade_api/entity.py", line 19, in __getattr__
+    if key in self._raw:
+  [Previous line repeated 991 more times]
+RecursionError: maximum recursion depth exceeded
+maximum recursion depth exceeded
+AAPL -> macd_signal: -0.0034666132001898702, rsi: 33.33333333333333 no trade signal thrown
+QQQ -> macd_signal: -0.005070745985487221, rsi: 72.22222222220293 no trade signal thrown
+SPY -> macd_signal: -0.022313712292488904, rsi: 43.99999999999545 no trade signal thrown
+
+
+
+
+
+
+
+
+SPY -> macd_signal: 0.007031738594352854, rsi: 100.0 no trade signal thrown
+qty
+AAPL -> macd_signal: 0.0004591092996996046, rsi: 100.0 no trade signal thrown
+MSFT -> macd_signal: -0.002988189444885672, rsi: 100.0 liquidating!
+liquidating asset: MSFT
+Exception in thread Thread-2:
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.9/site-packages/alpaca_trade_api/rest.py", line 161, in _one_request
+    resp.raise_for_status()
+  File "/home/pi/.local/lib/python3.9/site-packages/requests/models.py", line 943, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 404 Client Error: Not Found for url: https://paper-api.alpaca.markets/v2/positions/MSFT
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.9/threading.py", line 950, in _bootstrap_inner
+    self.run()
+  File "/usr/local/lib/python3.9/threading.py", line 888, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/pi/stock_bot_alpaca/transaction.py", line 11, in listen
+    transaction.submit(api)
+  File "/home/pi/stock_bot_alpaca/transaction.py", line 42, in submit
+    return api.close_position(self.ticker)
+  File "/home/pi/.local/lib/python3.9/site-packages/alpaca_trade_api/rest.py", line 422, in close_position
+    resp = self.delete('/positions/{}'.format(symbol))
+  File "/home/pi/.local/lib/python3.9/site-packages/alpaca_trade_api/rest.py", line 189, in delete
+    return self._request('DELETE', path, data)
+  File "/home/pi/.local/lib/python3.9/site-packages/alpaca_trade_api/rest.py", line 140, in _request
+    return self._one_request(method, url, opts, retry)
+  File "/home/pi/.local/lib/python3.9/site-packages/alpaca_trade_api/rest.py", line 169, in _one_request
+    raise APIError(error, http_error)
+alpaca_trade_api.rest.APIError: position does not exist
+AAPL -> macd_signal: -0.006614204233675501, rsi: 100.0 no trade signal thrown
+
+
+SPY -> macd_signal: -0.004752508875269623, rsi: 12.244897959175148 no trade signal thrown
+Exception in thread Thread-2:
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.9/site-packages/alpaca_trade_api/rest.py", line 161, in _one_request
+    resp.raise_for_status()
+  File "/home/pi/.local/lib/python3.9/site-packages/requests/models.py", line 943, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 422 Client Error: Unprocessable Entity for url: https://paper-api.alpaca.markets/v2/orders
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.9/threading.py", line 950, in _bootstrap_inner
+    self.run()
+  File "/usr/local/lib/python3.9/threading.py", line 888, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/pi/stock_bot_alpaca/transaction.py", line 11, in listen
+    transaction.submit(api)
+  File "/home/pi/stock_bot_alpaca/transaction.py", line 55, in submit
+    order = api.submit_order(
+  File "/home/pi/.local/lib/python3.9/site-packages/alpaca_trade_api/rest.py", line 342, in submit_order
+    resp = self.post('/orders', params)
+  File "/home/pi/.local/lib/python3.9/site-packages/alpaca_trade_api/rest.py", line 180, in post
+    return self._request('POST', path, data)
+  File "/home/pi/.local/lib/python3.9/site-packages/alpaca_trade_api/rest.py", line 140, in _request
+    return self._one_request(method, url, opts, retry)
+  File "/home/pi/.local/lib/python3.9/site-packages/alpaca_trade_api/rest.py", line 169, in _one_request
+    raise APIError(error, http_error)
+alpaca_trade_api.rest.APIError: qty must be > 0
+MSFT -> macd_signal: 0.006900386247792768, rsi: 11.111111111104094 buying!
+QQQ -> macd_signal: 0.0010286471245464154, rsi: 0.0 buying!
