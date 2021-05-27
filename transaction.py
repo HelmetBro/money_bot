@@ -8,8 +8,11 @@ TIMEOUT = 9
 def listen(pipe, api):
 	# listen to pipe, and submit requests accordingly
 	while True:
-		transaction = pipe.recv()
-		transaction.submit(api)
+		try:
+			transaction = pipe.recv()
+			transaction.submit(api)
+		except Exception as e:
+			logger.logp(e)
 
 class transaction:
 	# pipe where transaction is sent upstream
@@ -26,16 +29,18 @@ class transaction:
 	# There are two types of transactions- a transation can be sent with quantity, or notion (money amount).
 
 	def __init__(self, order_pipe, transaction_type, ticker, side, order_type, value, time_in_force):
-		self.order_pipe = order_pipe
+		self.order_pipe       = order_pipe
 		self.transaction_type = transaction_type
-		self.ticker = ticker
-		self.side = side
-		self.order_type = order_type
-		self.value = value
-		self.time_in_force = time_in_force
+		self.ticker           = ticker
+		self.side             = side
+		self.order_type       = order_type
+		self.value            = value
+		self.time_in_force    = time_in_force
 
 	# only to be called by main processes sub-thread, listen()
 	def submit(self, api):
+
+		order = None
 
 		# negative value? liquidate asset.
 		if self.value < 0:

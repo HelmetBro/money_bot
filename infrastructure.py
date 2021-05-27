@@ -28,7 +28,7 @@ stream = Stream(data_feed=FEED, raw_data=True)
 
 # tickers = ['BBBY', 'GME', 'NOK', 'AMC', 'SNDL', 'NAKD', 'CTRM', 'TRCH', 'IDEX', 'CCIV']
 # tickers = ['GOVX', 'TRCH', 'IDEX', 'PLTR', 'CNSP', 'USX', 'GRNQ', 'VISL', 'CCIV']
-tickers = {'TSLA', 'AAPL', 'MSFT', 'SPY', 'QQQ'}
+tickers = {'TSLA', 'AAPL', 'MSFT', 'SPY', 'QQQ', 'BBBY', 'GME', 'NOK', 'AMC', 'SNDL', 'NAKD', 'CTRM'}
 # tickers = ['TSLA']
 
 # used only for main process to join() upon termination. do NOT use a process pool
@@ -184,13 +184,6 @@ def start_loop(positions, cash):
 			investable_qty))
 		child_processes.append(process)
 
-		#subscribing to each ticker
-		stream.subscribe_trades(trade_callback, ticker)
-		stream.subscribe_quotes(quote_callback, ticker)
-		stream.subscribe_bars(bars_callback, ticker)
-
-	stream.subscribe_trade_updates(updates_callback)
-
 	# thread to initiate logging to run in a background thread on main process
 	logger_thread = threading.Thread(target=logger.listen, daemon=True)
 	logger_thread.start()
@@ -214,9 +207,9 @@ def start_loop(positions, cash):
 				asyncio.run(bars_callback(copy.deepcopy(tsla_bars[x])))
 		asyncio.set_event_loop(old_loop)
 
-	stream.run() # this is blocking
+	connect()
 
-	raise Exception("stream run returned! control flow is not supposed to get here!")
+	raise Exception("control flow is not supposed to get here!")
 
 def work(logging_queue, order_pipe, readers, ticker, investable_qty):
 	try:
@@ -238,6 +231,19 @@ def work(logging_queue, order_pipe, readers, ticker, investable_qty):
 	except Exception as e:
 		logger.logp("PID: {} TICKER: {} caught error!".format(os.getpid(), ticker), 'critical')
 		logger.logp(e, 'critical')
-		traceback.print_exc()
-	except:
-		logger.logp("special error was thrown", 'critical')
+
+def connect():
+	while True:
+		try:
+			# subscribing
+			for ticker in tickers:
+				stream.subscribe_trades(trade_callback, ticker)
+				stream.subscribe_quotes(quote_callback, ticker)
+				stream.subscribe_bars(bars_callback, ticker)
+			stream.subscribe_trade_updates(updates_callback)
+			stream.run() # this is blocking
+		except Exception as e:
+			logger.logp('stream websocket threw an error!' ,'critical')
+			logger.logp(e ,'critical')
+			time.sleep(3) # giving Alpaca time to catch up and reconnect
+			logger.logp('reconnecting after crash...' ,'critical')

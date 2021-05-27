@@ -2,6 +2,8 @@ import os
 import argparse
 import infrastructure
 import traceback
+import time
+import logger
 from signal import signal, SIGABRT, SIGINT, SIGTERM
 
 # parsing arguments and setting global BACKTRADING var
@@ -12,20 +14,26 @@ parser.add_argument("-b", "--backtrader",
 					action="store_true")
 BACKTRADING = parser.parse_args().backtrader
 
-def main_process_cleanup(*args):
-	print()
-	for child in infrastructure.child_processes:
-		print("terminating child process " + str(child.pid))
-		os.kill(child.pid, SIGABRT)
-		child.join()
-	print("terminating main process " + str(os.getpid()))
+def force_kill(*args):
+	child_process_cleanup()
+	logger.logp("FORCED: terminating main process " + str(os.getpid()))
+	time.sleep(0.5) # waiting for logging thread to catch up
 	os.kill(os.getpid(), SIGABRT)
 
+def child_process_cleanup(*args):
+	logger.logp()
+	for child in infrastructure.child_processes:
+		logger.logp("terminating child process " + str(child.pid))
+		os.kill(child.pid, SIGABRT)
+		child.join()
+
 if __name__ == "__main__":
-	try:
-		for sig in (SIGINT, SIGTERM):
-			signal(sig, main_process_cleanup)
-		infrastructure.main()
-	except Exception as e:
-		traceback.print_exc()
-		main_process_cleanup()
+	for sig in (SIGINT, SIGTERM):
+		signal(sig, force_kill)
+	while True:
+		try:
+			infrastructure.main()
+		except Exception as e:
+			logger.logp(e)
+			logger.logp("fatal error. attempting to recover")
+			child_process_cleanup()

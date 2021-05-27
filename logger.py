@@ -2,6 +2,7 @@ import os
 import multiprocessing
 import logging
 import time
+from datetime import datetime
 
 LOG_LEVEL = logging.INFO
 
@@ -14,10 +15,16 @@ class Trace:
 		delta = end-self.start
 		print("MS [{}] NS [{}]".format(round(delta * 1000), delta))
 
+def uniquify_filename(path):
+	date = datetime.now().strftime("%m-%d-%Y_%H:%M:%S")
+	filename, extension = os.path.splitext(path)
+	return filename + "_" + date + extension
+
 def main_setup():
 	FORMAT = '%(asctime)-15s | %(message)s'
-	filename = 'history.log'
-	if os.path.exists(filename): os.remove(filename)
+	filename = uniquify_filename('history.log')
+	if not os.path.exists(filename):
+		open(filename, "x")
 	logging.basicConfig(format=FORMAT, filename=filename, level=LOG_LEVEL)
 	global queue
 	queue = multiprocessing.Queue()
@@ -43,11 +50,11 @@ def listen():
 		if log['priority'] == 'critical': logging.critical(log['data'])
 		if log['priority'] == 'TERMINATE': raise Exception("raised by TERMINATE")
 
-def log(data, priority='info'):
+def log(data='', priority='info'):
 	global queue
 	queue.put({'priority': priority, 'data': data})
 
-def logp(data, priority='info'):
+def logp(data='', priority='info'):
 	global queue
 	print(data)
 	queue.put({'priority': priority, 'data': data})

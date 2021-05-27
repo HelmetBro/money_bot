@@ -9,13 +9,13 @@ class macd_rsi(algorithm.algorithm):
 	ticker = None
 	investable_qty = 0 # identical to buying power, until they fix 'notional'
 
-	long_period_macd  = 6 # past 26 mintues
-	short_period_macd = 3 # past 12 mintues
-	period_rsi        = 5 # past 14 mintues
-	signal_ema_period = 2 # past 9 mintues
+	long_period_macd  = 26 # past 26 mintues
+	short_period_macd = 12 # past 12 mintues
+	signal_ema_period = 9  # past 9 mintues
 
-	rsi_upper_bound = 60 # 66.66 - this is aggressive. 70 is standard
-	rsi_lower_bound = 40 # 33.33 - this is aggressive. 30 is standard
+	period_rsi      = 14 # past 14 mintues
+	rsi_upper_bound = 55 # 66.66 - this is aggressive. 70 is standard
+	rsi_lower_bound = 45 # 33.33 - this is aggressive. 30 is standard
 
 	def __init__(self, ticker, order_pipe, readers, investable_qty):
 		super().__init__(order_pipe, readers)
@@ -24,8 +24,8 @@ class macd_rsi(algorithm.algorithm):
 		threading.Thread(target=self.update_qty, args=(), daemon=True).start()
 
 	def update_qty(self):
-		try:
-			while True:
+		while True:
+			try:
 				# get latest update
 				update = super().on_updates_get(1)
 
@@ -41,9 +41,9 @@ class macd_rsi(algorithm.algorithm):
 						if (self.investable_qty == 0):
 							raise Exception("{} investable_qty is 0 after sell order!".format(self.ticker))
 
-		except Exception as e:
-			traceback.print_exc()
-			logger.logp(e)
+			except Exception as e:
+				traceback.print_exc()
+				logger.logp(e)
 
 	def run(self):
 		while True:

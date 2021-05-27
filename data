@@ -755,3 +755,9 @@ Traceback (most recent call last):
 alpaca_trade_api.rest.APIError: qty must be > 0
 MSFT -> macd_signal: 0.006900386247792768, rsi: 11.111111111104094 buying!
 QQQ -> macd_signal: 0.0010286471245464154, rsi: 0.0 buying!
+
+
+
+
+
+not actually buying!
