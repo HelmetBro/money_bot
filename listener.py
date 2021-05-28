@@ -1,6 +1,5 @@
 import threading
 import queue
-import traceback
 import logger
 
 class listener:
@@ -17,37 +16,33 @@ class listener:
 		threading.Thread(target=self.updates_listener, args=(readers[3],), daemon=True).start()
 
 	def trades_listener(self, listener):
-		try:
-			while True:
+		while True:
+			try:
 				data = listener.recv()
 				self.trades_queue.put(data)
-		except Exception as e:
-			traceback.print_exc()
-			logger.logp(e)
+			except Exception as e:
+				logger.logp(e)
 
 	def quotes_listener(self, listener):
-		try:
-			while True:
+		while True:
+			try:
 				data = listener.recv()
 				self.quotes_queue.put(data)
-		except Exception as e:
-			traceback.print_exc()
-			logger.logp(e)
+			except Exception as e:
+				logger.logp(e)
 
 	def bars_listener(self, listener):
-		try:
-			while True:
+		while True:
+			try:
 				data = listener.recv()
 				self.bars_queue.put(data)
-		except Exception as e:
-			traceback.print_exc()
-			logger.logp(e)
+			except Exception as e:
+				logger.logp(e)
 
 	def updates_listener(self, listener):
-		try:
-			while True:
+		while True:
+			try:
 				data = listener.recv()
 				self.updates_queue.put(data)
-		except Exception as e:
-			traceback.print_exc()
-			logger.logp(e)
+			except Exception as e:
+				logger.logp(e)

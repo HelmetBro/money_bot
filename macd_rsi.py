@@ -3,7 +3,6 @@ import logger
 import transaction
 import algo_math
 import threading
-import traceback
 
 class macd_rsi(algorithm.algorithm):
 	ticker = None
@@ -42,7 +41,6 @@ class macd_rsi(algorithm.algorithm):
 							raise Exception("{} investable_qty is 0 after sell order!".format(self.ticker))
 
 			except Exception as e:
-				traceback.print_exc()
 				logger.logp(e)
 
 	def run(self):

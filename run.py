@@ -1,7 +1,6 @@
 import os
 import argparse
 import infrastructure
-import traceback
 import time
 import logger
 from signal import signal, SIGABRT, SIGINT, SIGTERM

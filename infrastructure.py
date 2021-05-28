@@ -3,7 +3,6 @@ import os
 from run import BACKTRADING as BACKTRADING
 import multiprocessing
 import threading
-import traceback
 import transaction
 import time
 import asyncio
@@ -119,6 +118,8 @@ async def bars_callback(b):
 			stream['writer'].send(b)
 
 async def updates_callback(u):
+	logger.logp("GOT NEW UPDATE FROM AN ORDER!")
+	logger.log(u)
 	for stream in updates_stream:
 		if stream['ticker'] == u.order['symbol']:
 			stream['writer'].send(u)
@@ -185,12 +186,10 @@ def start_loop(positions, cash):
 		child_processes.append(process)
 
 	# thread to initiate logging to run in a background thread on main process
-	logger_thread = threading.Thread(target=logger.listen, daemon=True)
-	logger_thread.start()
+	threading.Thread(target=logger.listen, daemon=True).start()
 
 	# thread to handle api requests from Alpaca, and feed children
-	api_thread = threading.Thread(target=transaction.listen, args=(parent_order_pipe, api,), daemon=True)
-	api_thread.start()
+	threading.Thread(target=transaction.listen, args=(parent_order_pipe, api,), daemon=True).start()
 
 	for process in child_processes:
 		process.start()
@@ -212,25 +211,28 @@ def start_loop(positions, cash):
 	raise Exception("control flow is not supposed to get here!")
 
 def work(logging_queue, order_pipe, readers, ticker, investable_qty):
-	try:
-		# setting up logging/signals
-		signal(SIGINT, SIG_IGN) # ignore all interupts on sub processes
-		logger.process_setup(logging_queue)
-		logger.logp("subprocess for {} started".format(ticker))
 
-		# choose our algorithm can put any here
-		algorithm = macd_rsi(ticker,
-							order_pipe,
-							readers,
-							investable_qty)
+	# setting up logging/signals
+	signal(SIGINT, SIG_IGN) # ignore all interupts on sub processes
+	logger.process_setup(logging_queue)
 
-		algorithm.run()
-	except FunctionTimedOut as e:
-		# implement the retry sometime
-		logger.log("PID: {} TICKER: {} timed out! TIMEOUT = {}, retrying on next activation".format(os.getpid(), ticker, TIMEOUT), 'error')
-	except Exception as e:
-		logger.logp("PID: {} TICKER: {} caught error!".format(os.getpid(), ticker), 'critical')
-		logger.logp(e, 'critical')
+	while True:
+		try:
+			logger.logp("subprocess for {} started".format(ticker))
+
+			# choose our algorithm can put any here
+			algorithm = macd_rsi(ticker,
+								order_pipe,
+								readers,
+								investable_qty)
+
+			algorithm.run()
+		except FunctionTimedOut as e:
+			# implement the retry sometime
+			logger.log("PID: {} TICKER: {} timed out! TIMEOUT = {}, retrying on next activation".format(os.getpid(), ticker, TIMEOUT), 'error')
+		except Exception as e:
+			logger.logp("PID: {} TICKER: {} caught error!".format(os.getpid(), ticker), 'critical')
+			logger.logp(e, 'critical')
 
 def connect():
 	while True:

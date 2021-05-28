@@ -40,25 +40,23 @@ class transaction:
 	# only to be called by main processes sub-thread, listen()
 	def submit(self, api):
 
-		order = None
-
 		# negative value? liquidate asset.
 		if self.value < 0:
 			logger.logp("liquidating asset: {}".format(self.ticker))
 			try:
-				order = api.close_position(self.ticker)
+				api.close_position(self.ticker)
 			except alpaca_trade_api.rest.APIError:
 				logger.logp("position did not exist!")
 			except Exception as e:
 				logger.logp(e)
-			return order
+			return
 
 		# otherwise just submit a regular order
 		logger.logp(self.get_info())
 
 		if self.transaction_type == 'notional':
 			try:
-				order = api.submit_order(
+				api.submit_order(
 					symbol 	      = self.ticker,
 					side   	      = self.side,
 					type   	      = self.order_type,
@@ -69,7 +67,7 @@ class transaction:
 
 		elif self.transaction_type == 'quantity':
 			try:
-				order = api.submit_order(
+				api.submit_order(
 					symbol 	      = self.ticker,
 					side   	      = self.side,
 					type   	      = self.order_type,
@@ -82,8 +80,6 @@ class transaction:
 			error = "FATAL ERROR! incorrect transaction type"
 			logger.logp(error)
 			raise Exception(error)
-
-		return order
 
 	def get_info(self):
 		return "submitting order: ticker [{}] transaction type [{}] side [{}] order type [{}] value [{}] tif [{}]".format(
