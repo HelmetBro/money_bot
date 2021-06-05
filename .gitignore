@@ -1,0 +1,12 @@
+node_modules/
+CMakeFiles/
+cmake_install.cmake
+CmakeCache.txt
+MakeFile
+
+# Compiled source #
+###################
+*.dll
+*.exe
+*.o
+*.so
