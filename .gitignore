@@ -1,12 +1,10 @@
-node_modules/
-CMakeFiles/
-cmake_install.cmake
-CmakeCache.txt
-MakeFile
+# bin
+infinite_money_glitch
 
-# Compiled source #
-###################
-*.dll
-*.exe
-*.o
-*.so
+# cloned external dependencies
+dependencies/*
+!dependencies/README.md
+
+# all generated files from cmake
+cmake
+!cmake/CMakeLists.txt
