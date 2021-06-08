@@ -8,3 +8,5 @@ dependencies/*
 # all generated files from cmake
 cmake
 !cmake/CMakeLists.txt
+
+build/
