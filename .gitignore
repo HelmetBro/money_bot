@@ -1,12 +1,3 @@
 # bin
 infinite_money_glitch
-
-# cloned external dependencies
-dependencies/*
-!dependencies/README.md
-
-# all generated files from cmake
-cmake
-!cmake/CMakeLists.txt
-
 build/
