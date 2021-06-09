@@ -16,7 +16,7 @@ include(FetchContent)  # To download dependencies
 include(CTest)         # To handle testing
 
 # Add the dependencies
-add_subdirectory(dependencies)
+include(dependencies/CMakeLists.txt)
 
 # Including the sources
 include_directories(include)
